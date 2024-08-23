@@ -1,0 +1,9 @@
+node_modules
+dist/
+build/
+.DS_Store
+*.tgz
+cloudrun/env
+*.clasp-dev.json
+*.clasp-prod.json
+*.clasp.json

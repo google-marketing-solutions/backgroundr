@@ -1,0 +1,152 @@
+<!--
+Copyright 2024 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<mat-progress-bar
+  class="sticky"
+  [mode]="loadingProgress === undefined ? 'indeterminate' : 'determinate'"
+  [value]="loadingProgress"
+  *ngIf="isLoading"
+></mat-progress-bar>
+<div class="main-content">
+  <h1 style="text-align: center">BackgroundR</h1>
+  <mat-form-field>
+    <mat-label>Cloud Project ID</mat-label>
+    <input
+      matInput
+      type="text"
+      [(ngModel)]="projectId"
+      [disabled]="isLoading"
+    />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Region</mat-label>
+    <input matInput type="text" [(ngModel)]="region" [disabled]="isLoading" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Image Generation Model</mat-label>
+    <mat-select [(ngModel)]="modelId" [disabled]="isLoading">
+      <mat-option value="imagegeneration@006"
+        >imagegeneration&#64;006</mat-option
+      >
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Drive Folder ID</mat-label>
+    <input
+      matInput
+      type="text"
+      [(ngModel)]="driveFolderId"
+      [disabled]="isLoading"
+    />
+  </mat-form-field>
+  <mat-expansion-panel
+    class="mat-elevation-z4"
+    #backgroundVariations
+    [expanded]="true"
+  >
+    <mat-expansion-panel-header
+      >Background variations
+    </mat-expansion-panel-header>
+    <form [formGroup]="form" class="form" style="row-gap: 24px">
+      <mat-card
+        formArrayName="backgrounds"
+        *ngFor="let background of backgrounds.controls; index as i"
+      >
+        <ng-container [formGroupName]="i">
+          <mat-card-content class="mat-elevation-z6 form">
+            <mat-form-field>
+              <mat-label>Title</mat-label>
+              <input
+                matInput
+                type="text"
+                [disabled]="isLoading"
+                formControlName="title"
+              />
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Description</mat-label>
+              <input
+                matInput
+                type="text"
+                [disabled]="isLoading"
+                formControlName="description"
+              />
+            </mat-form-field>
+            <button mat-mini-fab color="warn" (click)="removeBackground(i)">
+              <mat-icon fontIcon="delete"></mat-icon>
+            </button>
+          </mat-card-content>
+        </ng-container>
+      </mat-card>
+
+      <button mat-fab (click)="addBackground()" color="primary">
+        <mat-icon fontIcon="add"></mat-icon>
+      </button>
+    </form>
+  </mat-expansion-panel>
+  <br />
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="isLoading"
+    class="button"
+    (click)="saveConfig()"
+  >
+    Save config
+  </button>
+  <mat-divider></mat-divider>
+  <br />
+  <h3 style="text-align: center">Preview (in Sheet)</h3>
+  <button
+    mat-raised-button
+    class="button"
+    color="primary"
+    [disabled]="isLoading"
+    (click)="getImageAssets()"
+  >
+    Get images
+  </button>
+  <button
+    mat-raised-button
+    class="button"
+    color="primary"
+    [disabled]="isLoading"
+    (click)="processAssets()"
+  >
+    Create variants
+  </button>
+
+  <mat-divider></mat-divider>
+  <br />
+  <h3 style="text-align: center">Run</h3>
+  <button
+    mat-raised-button
+    class="button"
+    color="primary"
+    [disabled]="isLoading"
+    (click)="addFolderToQueue()"
+  >
+    Add folder to queue
+  </button>
+  <button
+    mat-raised-button
+    class="button"
+    color="primary"
+    [disabled]="isLoading"
+    (click)="run()"
+  >
+    Run queue
+  </button>
+</div>
