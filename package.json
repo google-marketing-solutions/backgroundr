@@ -42,5 +42,8 @@
     "rollup-plugin-typescript2": "^0.35.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^18.2.1"
   }
 }
