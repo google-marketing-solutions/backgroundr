@@ -36,7 +36,7 @@
     "ncp": "^2.0.0",
     "prettier": "^3.0.3",
     "rimraf": "^5.0.1",
-    "rollup": "^3.29.2",
+    "rollup": "^3.29.5",
     "rollup-plugin-cleanup": "^3.2.1",
     "rollup-plugin-license": "^3.1.0",
     "rollup-plugin-typescript2": "^0.35.0",
