@@ -23,6 +23,7 @@
     "node": ">=12"
   },
   "dependencies": {
+    "@angular/platform-browser": "^19.0.5",
     "@google/clasp": "^2.4.2",
     "@types/google-apps-script": "^1.0.69",
     "@types/jest": "^29.5.5",

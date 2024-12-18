@@ -41,17 +41,13 @@ export const getPredictionEndpoint = (
   return `https://${region}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}:predict`;
 };
 
-export const predict = (
+export const getPredictionBody = (
   prompt: string,
   image: string,
-  predictionEndpoint: string
-): PredictionResponse => {
-  Utilities.sleep(1000);
-  // respect rate limitations
-  console.log(`Prompt: ${prompt}`);
-  const res = fetchJson<PredictionResponse>(
-    predictionEndpoint,
-    createRequestOptions({
+  modelId: string
+): GoogleAppsScript.URL_Fetch.URLFetchRequestOptions => {
+  if (modelId.startsWith('imagegeneration@')) {
+    return createRequestOptions({
       instances: [
         {
           prompt,
@@ -66,7 +62,45 @@ export const predict = (
           editMode: 'product-image',
         },
       },
-    })
+    });
+  } else if (modelId.startsWith('imagen-3.0')) {
+    return createRequestOptions({
+      instances: [
+        {
+          prompt,
+          referenceImages: [
+            {
+              referenceType: 'REFERENCE_TYPE_RAW',
+              referenceId: 1,
+              referenceImage: {
+                bytesBase64Encoded: image,
+              },
+            },
+          ],
+        },
+      ],
+      parameters: {
+        safetySetting: 'block_only_high',
+        personGeneration: 'allow_adult',
+        sampleCount: 1,
+        promptLanguage: 'en',
+      },
+    });
+  } else throw Error(`Unsupported model: ${modelId}`);
+};
+
+export const predict = (
+  prompt: string,
+  image: string,
+  predictionEndpoint: string,
+  modelId: string
+): PredictionResponse => {
+  // respect rate limitations
+  Utilities.sleep(1000);
+  console.log(`Prompt: ${prompt}`);
+  const res = fetchJson<PredictionResponse>(
+    predictionEndpoint,
+    getPredictionBody(prompt, image, modelId)
   );
   console.log(JSON.stringify(res, null, 2));
   return res;

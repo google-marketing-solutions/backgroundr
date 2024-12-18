@@ -22,6 +22,7 @@ BackgroundR automatically creates new backgrounds for your images based on a tex
 
 ## Updates
 
+- **December 2024.** Support for Imagen 3.
 - **August 2024** Initial release.
 
 ## Getting Started

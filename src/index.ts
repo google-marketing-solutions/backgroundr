@@ -172,7 +172,8 @@ const processImageAssets = (
           const result = predict(
             `${e.description}`,
             base64Data,
-            imageGenerationEndpoint
+            imageGenerationEndpoint,
+            modelId
           );
           return SpreadsheetApp.newCellImage()
             .setSourceUrl(
