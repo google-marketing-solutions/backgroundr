@@ -30,7 +30,7 @@ interface ImageQueue {
   folderId: string;
   outputFolderId: string;
   fileName: string;
-  file: string;
+  fileId: string;
   prompt: string;
   variationId: number;
 }
@@ -90,16 +90,13 @@ const getImagesToProcess = () => {
     }
     const outputFolderId = ensureFolderExists(folderId);
     listFiles(folderId).forEach((file: GoogleAppsScript.Drive.File) => {
-      const fileBlob = file.getBlob();
-      const bytes = fileBlob.getBytes();
-      const base64Data = Utilities.base64Encode(bytes);
       let variationId = 1;
       prompts.forEach(prompt => {
         imageQueue.push({
           folderId,
           outputFolderId,
           fileName: file.getName(),
-          file: base64Data,
+          fileId: file.getId(),
           prompt,
           variationId,
         });
@@ -116,27 +113,31 @@ const getImageAssets = (folderId: string) => {
   }
   IMAGE_SHEET.getDataRange().offset(HEADER_ROWS, 0).clearContent();
 
-  listFiles(folderId).forEach((file: GoogleAppsScript.Drive.File) => {
-    const fileBlob = file.getBlob();
-    const bytes = fileBlob.getBytes();
-    const base64Data = Utilities.base64Encode(bytes);
-    const dataUrl = `data:image/png;base64,${base64Data}`;
-    const cellImage = SpreadsheetApp.newCellImage()
-      .setSourceUrl(dataUrl)
-      .build();
-    const row = [cellImage, file.getId()];
-    const sheetRow = IMAGE_SHEET.getLastRow() + 1;
-    IMAGE_SHEET.getRange(sheetRow, 1, 1, row.length).setValues([row]);
-    IMAGE_SHEET.setRowHeight(sheetRow, 256);
-    IMAGE_SHEET.setColumnWidth(1, 256);
-  });
+  listFiles(folderId)
+    .filter((file: GoogleAppsScript.Drive.File) => file.getSize() < 10000000)
+    .slice(0, 10) // Sample 10 images under 10 Mb.
+    .forEach((file: GoogleAppsScript.Drive.File) => {
+      const fileBlob = file.getBlob();
+      const bytes = fileBlob.getBytes();
+      const base64Data = Utilities.base64Encode(bytes);
+      const dataUrl = `data:${file.getMimeType()};base64,${base64Data}`;
+      const cellImage = SpreadsheetApp.newCellImage()
+        .setSourceUrl(dataUrl)
+        .build();
+      const row = [cellImage, file.getId()];
+      const sheetRow = IMAGE_SHEET.getLastRow() + 1;
+      IMAGE_SHEET.getRange(sheetRow, 1, 1, row.length).setValues([row]);
+      IMAGE_SHEET.setRowHeight(sheetRow, 256);
+      IMAGE_SHEET.setColumnWidth(1, 256);
+    });
 };
 
 const processImageAssets = (
   backgroundDefinitions: BackgroundDefinition[],
   projectId: string,
   region: string,
-  modelId: string
+  modelId: string,
+  backgroundRemoval: boolean
 ) => {
   if (!IMAGE_SHEET) {
     throw `Sheet 'Images' not found`;
@@ -146,7 +147,6 @@ const processImageAssets = (
     region,
     modelId
   );
-  // TODO: Don't clear content; continue from where it left off on last execution
   IMAGE_SHEET.getRange('B:B')
     .offset(HEADER_ROWS, 0)
     .getValues()
@@ -173,7 +173,8 @@ const processImageAssets = (
             `${e.description}`,
             base64Data,
             imageGenerationEndpoint,
-            modelId
+            modelId,
+            backgroundRemoval
           );
           return SpreadsheetApp.newCellImage()
             .setSourceUrl(

@@ -37,14 +37,15 @@ limitations under the License.
   <mat-form-field>
     <mat-label>Image Generation Model</mat-label>
     <mat-select [(ngModel)]="modelId" [disabled]="isLoading">
-      <mat-option value="imagen-3.0-capability-preview-0930"
-        >Imagen 3 (Preview)</mat-option
-      >
+      <mat-option value="imagen-3.0-capability-001">Imagen 3</mat-option>
       <mat-option value="imagegeneration@006"
         >imagegeneration&#64;006</mat-option
       >
     </mat-select>
   </mat-form-field>
+  <mat-checkbox [(ngModel)]="backgroundRemoval"
+    >Remove existing background</mat-checkbox
+  >
   <mat-form-field>
     <mat-label>Drive Folder ID</mat-label>
     <input

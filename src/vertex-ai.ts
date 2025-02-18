@@ -44,7 +44,8 @@ export const getPredictionEndpoint = (
 export const getPredictionBody = (
   prompt: string,
   image: string,
-  modelId: string
+  modelId: string,
+  backgroundRemoval: boolean
 ): GoogleAppsScript.URL_Fetch.URLFetchRequestOptions => {
   if (modelId.startsWith('imagegeneration@')) {
     return createRequestOptions({
@@ -64,28 +65,66 @@ export const getPredictionBody = (
       },
     });
   } else if (modelId.startsWith('imagen-3.0')) {
-    return createRequestOptions({
-      instances: [
-        {
-          prompt,
-          referenceImages: [
-            {
-              referenceType: 'REFERENCE_TYPE_RAW',
-              referenceId: 1,
-              referenceImage: {
-                bytesBase64Encoded: image,
+    if (backgroundRemoval) {
+      return createRequestOptions({
+        instances: [
+          {
+            prompt,
+            referenceImages: [
+              {
+                referenceType: 'REFERENCE_TYPE_RAW',
+                referenceId: 1,
+                referenceImage: {
+                  bytesBase64Encoded: image,
+                },
               },
-            },
-          ],
+              {
+                referenceType: 'REFERENCE_TYPE_MASK',
+                referenceId: 2,
+                maskImageConfig: {
+                  maskMode: 'MASK_MODE_BACKGROUND',
+                  dilation: 0.0,
+                },
+              },
+            ],
+          },
+        ],
+        parameters: {
+          negativePrompt: '',
+          promptLanguage: 'en',
+          editConfig: {
+            baseSteps: 75,
+          },
+          editMode: 'EDIT_MODE_BGSWAP',
+          sampleCount: 1,
+          safetySetting: 'block_only_high',
+          personGeneration: 'allow_adult',
         },
-      ],
-      parameters: {
-        safetySetting: 'block_only_high',
-        personGeneration: 'allow_adult',
-        sampleCount: 1,
-        promptLanguage: 'en',
-      },
-    });
+      });
+    } else {
+      return createRequestOptions({
+        instances: [
+          {
+            prompt,
+            referenceImages: [
+              {
+                referenceType: 'REFERENCE_TYPE_RAW',
+                referenceId: 1,
+                referenceImage: {
+                  bytesBase64Encoded: image,
+                },
+              },
+            ],
+          },
+        ],
+        parameters: {
+          safetySetting: 'block_only_high',
+          personGeneration: 'allow_adult',
+          sampleCount: 1,
+          promptLanguage: 'en',
+        },
+      });
+    }
   } else throw Error(`Unsupported model: ${modelId}`);
 };
 
@@ -93,14 +132,15 @@ export const predict = (
   prompt: string,
   image: string,
   predictionEndpoint: string,
-  modelId: string
+  modelId: string,
+  backgroundRemoval: boolean
 ): PredictionResponse => {
   // respect rate limitations
   Utilities.sleep(1000);
   console.log(`Prompt: ${prompt}`);
   const res = fetchJson<PredictionResponse>(
     predictionEndpoint,
-    getPredictionBody(prompt, image, modelId)
+    getPredictionBody(prompt, image, modelId, backgroundRemoval)
   );
   console.log(JSON.stringify(res, null, 2));
   return res;
