@@ -195,7 +195,6 @@ export class AppComponent implements OnInit {
     });
   }
 
-  // TODO(): Update it for imagen 3.
   async createVertexAiCall(current: ImageQueue) {
     const vertexEndpoint = `https://${this.region}-aiplatform.googleapis.com/v1/projects/${this.projectId}/locations/${this.region}/publishers/google/models/${this.modelId}:predict`;
     const imageBlob = await firstValueFrom(
