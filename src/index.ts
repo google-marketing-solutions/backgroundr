@@ -181,6 +181,22 @@ function generateImages(
         suffix,
         ingredientsAsObject
       );
+
+  console.log({ prompt });
+
+  const manyPrompts = new Array(numberOfImages).fill(prompt).map(p => ({
+    description: p,
+  }));
+
+  return processImageAssets(
+    manyPrompts,
+    CONFIG['Cloud Project Id'],
+    '',
+    CONFIG['Image Generation Model'],
+    scoringThreshold,
+    maxRegenerations,
+    imageAspectRatio
+  );
 }
 
 const getImagesToProcess = () => {
@@ -275,9 +291,10 @@ const scoreImage = (image: string) => {
   };
 
   const geminiResponse = queryGemini(
-    CONFIG['Image Scoring Prompt'], //+ '\n\n' + outputSpec,
-    image,
-    'image/png',
+    [
+      { type: 'text', value: CONFIG['Image Scoring Prompt'] },
+      { type: 'image', value: image, mimeType: 'image/png' },
+    ],
     CONFIG['Cloud Project Id'],
     CONFIG['Scoring Model'],
     responseSchema
@@ -393,9 +410,10 @@ const processImageAssets = (
                 }"`
               );
               resultImageBase64 = queryGemini(
-                e.description,
-                base64Data,
-                mimeType,
+                [
+                  { type: 'text', value: e.description },
+                  { type: 'image', value: base64Data, mimeType: mimeType },
+                ],
                 CONFIG['Cloud Project Id'],
                 CONFIG['Image Generation Model'],
                 {},
@@ -424,9 +442,10 @@ const processImageAssets = (
             }
           } else {
             resultImageBase64 = queryGemini(
-              e.description,
-              base64Data,
-              mimeType,
+              [
+                { type: 'text', value: e.description },
+                { type: 'image', value: base64Data, mimeType: mimeType },
+              ],
               CONFIG['Cloud Project Id'],
               CONFIG['Image Generation Model'],
               {},

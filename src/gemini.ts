@@ -93,18 +93,7 @@ export class VertexAiApi {
    * @returns {string} The complete API endpoint URL for making requests to the model.
    */
   protected getEndPoint(model: string, suffix: string) {
-    console.log(
-      `https://aiplatform.googleapis.com/v1/projects/${this._projectId}/locations/global/publishers/google/models/${model}:${suffix}`
-    );
     return `https://aiplatform.googleapis.com/v1/projects/${this._projectId}/locations/global/publishers/google/models/${model}:${suffix}`;
-    /*
-    return (
-      `https://${this._region}-${this._apiEndpoint}/v1/projects/` +
-      `${this._projectId}/locations/${this._region}/publishers/google/models/` +
-      model +
-      `:${suffix}`
-    );
-    */
   }
   /**
    * Returns the specific API endpoint URL for the Gemini text model.
@@ -177,20 +166,21 @@ export class VertexAiApi {
    * @remarks
    * Note: Only one of `fileUri` or `image` should be provided. If both are provided, `image` will be ignored.
    */
-  callGeminiApi(
-    text: string,
-    image = '',
-    mimeType = 'image/jpg',
-    json = false,
-    responseSchema = {}
-  ) {
+  callGeminiApi(promptParts: PromptPart[], json = false, responseSchema = {}) {
     const options = Object.assign({}, this._baseOptions);
 
-    const parts: GeminiRequest[] = [{ text }];
-    if (image) {
-      parts.push({
-        inlineData: { data: image, mimeType },
-      });
+    const parts: GeminiRequest[] = [];
+    for (const part of promptParts) {
+      if (part.type === 'text') {
+        parts.push({ text: part.value });
+      } else if (part.type === 'image') {
+        parts.push({
+          inlineData: {
+            data: part.value,
+            mimeType: part.mimeType || 'image/jpeg',
+          },
+        });
+      }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -304,10 +294,14 @@ export class VertexAiApi {
   }
 }
 
+export interface PromptPart {
+  type: 'text' | 'image';
+  value: string; // For text, the string content; for image, base64 data.
+  mimeType?: string; // Required for image parts.
+}
+
 export function queryGemini(
-  prompt: string,
-  image: string,
-  mimeType: string,
+  promptParts: PromptPart[],
   gcpProjectId: string,
   modelId: string,
   responseSchema = {},
@@ -318,13 +312,7 @@ export function queryGemini(
     '',
     'aiplatform.googleapis.com',
     modelId,
-    undefined, // imageGenerationModel is not directly used in callGeminiApi, passing undefined
+    undefined,
     imageAspectRatio
-  ).callGeminiApi(
-    prompt,
-    image,
-    mimeType,
-    !modelId.includes('image'),
-    responseSchema
-  );
+  ).callGeminiApi(promptParts, !modelId.includes('image'), responseSchema);
 }
