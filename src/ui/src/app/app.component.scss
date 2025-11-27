@@ -59,3 +59,24 @@ mat-slide-toggle {
 .button-container {
   margin-top: 5px;
 }
+
+.ingredient-thumbnail {
+  max-height: 24px;
+  margin-right: 8px;
+}
+
+mat-option {
+  height: auto !important;
+}
+
+.mat-option {
+  .mat-pseudo-checkbox {
+    display: none !important;
+  }
+  span.mat-option-text {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+}
+

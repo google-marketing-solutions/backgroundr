@@ -100,7 +100,9 @@ function loadIngredients() {
     return {};
   }
 
-  const ingredientsAsObject: { [key: string]: string[] } = {};
+  const ingredientsAsObject: {
+    [key: string]: { name: string; thumbnail: string }[];
+  } = {};
   const headers = parts.shift(); // Remove header row
 
   parts.forEach(part => {
@@ -108,7 +110,32 @@ function loadIngredients() {
     const driveFolderId = part[1];
     if (name && driveFolderId) {
       const files = listFiles(driveFolderId).map(
-        (f: GoogleAppsScript.Drive.File) => f.getName()
+        (f: GoogleAppsScript.Drive.File) => {
+          try {
+            const blob = f.getBlob();
+            if (blob) {
+              const blobBase64 = Utilities.base64Encode(blob.getBytes());
+              return {
+                name: f.getName(),
+                thumbnail: `data:${blob.getContentType()};base64,${blobBase64}`,
+              };
+            } else {
+              return {
+                name: f.getName(),
+                thumbnail: '',
+              };
+            }
+          } catch (e) {
+            console.error(
+              `Error generating thumbnail for file: ${f.getName()}`,
+              e
+            );
+            return {
+              name: f.getName(),
+              thumbnail: '',
+            };
+          }
+        }
       );
       ingredientsAsObject[name] = files;
     }

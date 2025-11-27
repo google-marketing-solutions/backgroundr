@@ -37,6 +37,10 @@ export interface DropdownData {
   [key: string]: string[];
 }
 
+export interface IngredientsData {
+  [key: string]: { name: string; thumbnail: string }[];
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -83,7 +87,7 @@ export class AppComponent implements OnInit {
     '21:9',
   ];
   selectedAspectRatio: string | null = this.aspectRatios[0];
-  ingredientsData: DropdownData = {};
+  ingredientsData: IngredientsData = {};
   selectedIngredients: { [key: string]: string | null } = {};
 
   constructor(private zone: NgZone) {}
@@ -101,7 +105,10 @@ export class AppComponent implements OnInit {
     this.isLoading = true;
     google.script.run
       .withSuccessHandler(
-        (dropdowns: { variants: DropdownData; ingredients: DropdownData }) => {
+        (dropdowns: {
+          variants: DropdownData;
+          ingredients: IngredientsData;
+        }) => {
           this.zone.run(() => {
             this.dropdownsData = dropdowns.variants;
             this.ingredientsData = dropdowns.ingredients;

@@ -51,9 +51,10 @@ limitations under the License.
             <mat-option [value]="null"> -- </mat-option>
             <mat-option
               *ngFor="let value of ingredient.value"
-              [value]="value"
+              [value]="value.name"
             >
-              {{ value }}
+              <img *ngIf="value.thumbnail" [src]="value.thumbnail" class="ingredient-thumbnail" />
+              <span>{{ value.name }}</span>
             </mat-option>
           </mat-select>
         </mat-form-field>
