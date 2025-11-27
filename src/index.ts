@@ -77,7 +77,44 @@ function showSidebar() {
 // Trigered from sidebar angular
 function loadDropDowns() {
   const config = Config.readConfig();
-  return OnePrompt.getDropdowns(config['Dropdowns sheet']);
+  const dropdownsData = OnePrompt.getDropdowns(config['Dropdowns sheet']);
+  const ingredientsData = loadIngredients();
+  return {
+    variants: dropdownsData,
+    ingredients: ingredientsData,
+  };
+}
+
+function loadIngredients() {
+  const config = Config.readConfig();
+  const sheetName = config['Ingredients sheet'];
+  if (!SpreadsheetApp?.getActiveSpreadsheet()?.getSheetByName(sheetName)) {
+    throw new Error(`Sheet ${sheetName} not found`);
+  }
+
+  const parts = SpreadsheetApp?.getActiveSpreadsheet()
+    ?.getSheetByName(sheetName)
+    ?.getDataRange()
+    ?.getDisplayValues();
+  if (!parts || !parts.length) {
+    return {};
+  }
+
+  const ingredientsAsObject: { [key: string]: string[] } = {};
+  const headers = parts.shift(); // Remove header row
+
+  parts.forEach(part => {
+    const name = part[0];
+    const driveFolderId = part[1];
+    if (name && driveFolderId) {
+      const files = listFiles(driveFolderId).map(
+        (f: GoogleAppsScript.Drive.File) => f.getName()
+      );
+      ingredientsAsObject[name] = files;
+    }
+  });
+
+  return ingredientsAsObject;
 }
 
 // Trigered from sidebar angular
@@ -88,7 +125,10 @@ function generateImages(
   },
   scoringThreshold?: number,
   maxRegenerations?: number,
-  imageAspectRatio?: string
+  imageAspectRatio?: string,
+  ingredientsAsObject?: {
+    [key: string]: string[];
+  }
 ) {
   console.log('generateImages', {
     numberOfImages,
@@ -96,34 +136,24 @@ function generateImages(
     scoringThreshold,
     maxRegenerations,
     imageAspectRatio,
+    ingredientsAsObject,
   });
   const prefix = CONFIG['Prompt Prefix'];
   const suffix = CONFIG['Prompt Suffix'];
 
   const prompt = partsAsObject
-    ? OnePrompt.generatePrompt(partsAsObject, prefix, suffix)
+    ? OnePrompt.generatePrompt(
+        partsAsObject,
+        prefix,
+        suffix,
+        ingredientsAsObject
+      )
     : OnePrompt.generatePromptForSheet(
         CONFIG['Dropdowns sheet'],
         prefix,
-        suffix
+        suffix,
+        ingredientsAsObject
       );
-
-  //console.log({ prompt });
-
-  const manyPrompts = new Array(numberOfImages).fill(prompt).map(p => ({
-    description: p,
-  }));
-  //console.log({ manyPrompts });
-
-  return processImageAssets(
-    manyPrompts,
-    CONFIG['Cloud Project Id'],
-    '',
-    CONFIG['Image Generation Model'],
-    scoringThreshold,
-    maxRegenerations,
-    imageAspectRatio
-  );
 }
 
 const getImagesToProcess = () => {

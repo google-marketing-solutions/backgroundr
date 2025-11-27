@@ -17,18 +17,38 @@ export class OnePrompt {
   static generatePromptForSheet(
     sheetName: string,
     promptPrefix = '',
-    promptSuffix = ''
+    promptSuffix = '',
+    ingredientsAsObject?: { [key: string]: string[] }
   ) {
     const partsAsObject = OnePrompt.getDropdowns(sheetName);
-    return OnePrompt.generatePrompt(partsAsObject, promptPrefix, promptSuffix);
+    return OnePrompt.generatePrompt(
+      partsAsObject,
+      promptPrefix,
+      promptSuffix,
+      ingredientsAsObject
+    );
   }
 
   static generatePrompt(
     partsAsObject: { [key: string]: string[] },
     promptPrefix = '',
-    promptSuffix = ''
+    promptSuffix = '',
+    ingredientsAsObject?: { [key: string]: string[] }
   ) {
-    const promptParts = OnePrompt.generatePromptParts(partsAsObject);
+    const filteredIngredients = ingredientsAsObject
+      ? Object.entries(ingredientsAsObject)
+          .filter(([, value]) => value)
+          .reduce(
+            (obj, [key, value]) => {
+              obj[key] = value;
+              return obj;
+            },
+            {} as { [key: string]: string[] }
+          )
+      : {};
+
+    const combinedParts = { ...partsAsObject, ...filteredIngredients };
+    const promptParts = OnePrompt.generatePromptParts(combinedParts);
     return (
       (promptPrefix ? promptPrefix + '\n\n' : '') +
       promptParts.join('\n\n') +

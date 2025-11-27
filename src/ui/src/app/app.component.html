@@ -37,17 +37,40 @@ limitations under the License.
           </mat-select>
         </mat-form-field>
       </div>
-      <button
-        mat-raised-button
-        color="secondary"
-        [disabled]="isLoading"
-        class="button"
-        (click)="loadDropDowns()"
-      >
-        🔄 Reload Dropdowns
-      </button>
+      </mat-card-content>
+  </mat-card>
+  <mat-card class="dropdown-container">
+    <mat-card-header>
+      <mat-card-title>Ingredients</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngFor="let ingredient of ingredientsData | keyvalue">
+        <mat-form-field>
+          <mat-label>{{ ingredient.key }}</mat-label>
+          <mat-select [(value)]="selectedIngredients[ingredient.key]">
+            <mat-option [value]="null"> -- </mat-option>
+            <mat-option
+              *ngFor="let value of ingredient.value"
+              [value]="value"
+            >
+              {{ value }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </mat-card-content>
   </mat-card>
+  <div class="button-container">
+    <button
+      mat-raised-button
+      color="secondary"
+      [disabled]="isLoading"
+      class="button"
+      (click)="loadDropDowns()"
+    >
+      🔄 Reload Dropdowns
+    </button>
+  </div>
   <mat-card class="other-settings">
     <mat-card-header>
       <mat-card-title>Other settings</mat-card-title>

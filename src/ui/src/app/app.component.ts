@@ -83,6 +83,8 @@ export class AppComponent implements OnInit {
     '21:9',
   ];
   selectedAspectRatio: string | null = this.aspectRatios[0];
+  ingredientsData: DropdownData = {};
+  selectedIngredients: { [key: string]: string | null } = {};
 
   constructor(private zone: NgZone) {}
 
@@ -98,13 +100,18 @@ export class AppComponent implements OnInit {
   loadDropDowns() {
     this.isLoading = true;
     google.script.run
-      .withSuccessHandler((dropdowns: DropdownData) => {
-        this.zone.run(() => {
-          this.dropdownsData = dropdowns;
-          console.log('dropdownsData', this.dropdownsData);
-          this.isLoading = false;
-        });
-      })
+      .withSuccessHandler(
+        (dropdowns: { variants: DropdownData; ingredients: DropdownData }) => {
+          this.zone.run(() => {
+            this.dropdownsData = dropdowns.variants;
+            this.ingredientsData = dropdowns.ingredients;
+            for (const key in this.ingredientsData) {
+              this.selectedIngredients[key] = null;
+            }
+            this.isLoading = false;
+          });
+        }
+      )
       .loadDropDowns();
   }
 
@@ -127,7 +134,8 @@ export class AppComponent implements OnInit {
         this.selectedValues,
         this.autoScoreImages ? this.scoringThreshold : undefined,
         this.maxRegenerations,
-        this.selectedAspectRatio
+        this.selectedAspectRatio,
+        this.selectedIngredients
       );
   }
 
@@ -143,7 +151,8 @@ export class AppComponent implements OnInit {
         undefined,
         this.autoScoreImages ? Number(this.scoringThreshold) : undefined,
         Number(this.maxRegenerations),
-        this.selectedAspectRatio
+        this.selectedAspectRatio,
+        this.selectedIngredients
       );
   }
 }
