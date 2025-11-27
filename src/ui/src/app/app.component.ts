@@ -90,6 +90,17 @@ export class AppComponent implements OnInit {
   ingredientsData: IngredientsData = {};
   selectedIngredients: { [key: string]: string | null } = {};
 
+  getIngredientThumbnail(ingredientKey: string): string | undefined {
+    const selectedIngredientName = this.selectedIngredients[ingredientKey];
+    if (selectedIngredientName && this.ingredientsData[ingredientKey]) {
+      const selectedIngredient = this.ingredientsData[ingredientKey].find(
+        i => i.name === selectedIngredientName
+      );
+      return selectedIngredient?.thumbnail;
+    }
+    return undefined;
+  }
+
   constructor(private zone: NgZone) {}
 
   ngOnInit(): void {

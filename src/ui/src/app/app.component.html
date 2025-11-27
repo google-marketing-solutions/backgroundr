@@ -21,7 +21,7 @@ limitations under the License.
 ></mat-progress-bar>
 <div class="main-content">
   <h1 style="text-align: center">BackgroundR on 🍌s!</h1>
-  <mat-card class="dropdown-container">
+  <mat-card class="dropdown-container" *ngIf="(dropdownsData | keyvalue).length > 0">
     <mat-card-header>
       <mat-card-title>Customise your variants</mat-card-title>
     </mat-card-header>
@@ -39,7 +39,7 @@ limitations under the License.
       </div>
       </mat-card-content>
   </mat-card>
-  <mat-card class="dropdown-container">
+  <mat-card class="dropdown-container" *ngIf="(ingredientsData | keyvalue).length > 0">
     <mat-card-header>
       <mat-card-title>Ingredients</mat-card-title>
     </mat-card-header>
@@ -48,6 +48,10 @@ limitations under the License.
         <mat-form-field>
           <mat-label>{{ ingredient.key }}</mat-label>
           <mat-select [(value)]="selectedIngredients[ingredient.key]">
+            <mat-select-trigger>
+              <img *ngIf="getIngredientThumbnail(ingredient.key)" [src]="getIngredientThumbnail(ingredient.key)" class="ingredient-thumbnail" />
+              <span>{{ selectedIngredients[ingredient.key] }}</span>
+            </mat-select-trigger>
             <mat-option [value]="null"> -- </mat-option>
             <mat-option
               *ngFor="let value of ingredient.value"
