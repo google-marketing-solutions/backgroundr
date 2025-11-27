@@ -87,13 +87,15 @@ function generateImages(
     [key: string]: string[];
   },
   scoringThreshold?: number,
-  maxRegenerations?: number
+  maxRegenerations?: number,
+  imageAspectRatio?: string
 ) {
   console.log('generateImages', {
     numberOfImages,
     partsAsObject,
     scoringThreshold,
     maxRegenerations,
+    imageAspectRatio,
   });
   const prefix = CONFIG['Prompt Prefix'];
   const suffix = CONFIG['Prompt Suffix'];
@@ -105,6 +107,7 @@ function generateImages(
         prefix,
         suffix
       );
+
   //console.log({ prompt });
 
   const manyPrompts = new Array(numberOfImages).fill(prompt).map(p => ({
@@ -118,7 +121,8 @@ function generateImages(
     '',
     CONFIG['Image Generation Model'],
     scoringThreshold,
-    maxRegenerations
+    maxRegenerations,
+    imageAspectRatio
   );
 }
 
@@ -279,7 +283,8 @@ const processImageAssets = (
   region: string,
   modelId: string,
   scoringThreshold?: number,
-  maxRegenerations?: number
+  maxRegenerations?: number,
+  imageAspectRatio?: string
 ) => {
   console.log({ CONFIG });
   console.log('processImageAssets', {
@@ -335,7 +340,9 @@ const processImageAssets = (
                 base64Data,
                 mimeType,
                 CONFIG['Cloud Project Id'],
-                CONFIG['Image Generation Model']
+                CONFIG['Image Generation Model'],
+                {},
+                imageAspectRatio
               );
               const imageScore = scoreImage(base64Data);
               console.log(`Image score: ${imageScore}`);
@@ -364,7 +371,9 @@ const processImageAssets = (
               base64Data,
               mimeType,
               CONFIG['Cloud Project Id'],
-              CONFIG['Image Generation Model']
+              CONFIG['Image Generation Model'],
+              {},
+              imageAspectRatio
             );
           }
           return SpreadsheetApp.newCellImage()

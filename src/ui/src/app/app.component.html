@@ -63,6 +63,15 @@ limitations under the License.
         />
       </mat-form-field>
 
+      <mat-form-field appearance="fill">
+        <mat-label>Aspect Ratio</mat-label>
+        <mat-select [(ngModel)]="selectedAspectRatio">
+          <mat-option *ngFor="let ratio of aspectRatios" [value]="ratio">
+            {{ ratio }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <mat-slide-toggle [(ngModel)]="autoScoreImages">
         AI quality control
       </mat-slide-toggle>

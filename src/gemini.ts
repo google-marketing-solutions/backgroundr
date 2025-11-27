@@ -74,13 +74,15 @@ export class VertexAiApi {
    * @param {string} [_apiEndpoint='aiplatform.googleapis.com'] - The base API endpoint for Gemini. Usually, you won't need to change this.
    * @param {string} [_geminiModel='gemini-1.5-flash'] - The specific Gemini model for text generation tasks (e.g., 'gemini-1.5-flash'). Defaults to the latest flash model.
    * @param {string} [_imageGenerationModel='imagegeneration'] - The model for image generation tasks.
+   * @param {string} [_imageAspectRatio] - The aspect ratio for image generation tasks.
    */
   constructor(
     private _projectId: string,
     private _region = 'us-central1',
     private _apiEndpoint = 'aiplatform.googleapis.com',
     private _geminiModel = 'gemini-1.5-flash',
-    private _imageGenerationModel = 'imagegeneration'
+    private _imageGenerationModel = 'imagegeneration',
+    private _imageAspectRatio?: string
   ) {}
   /**
    * Constructs the API endpoint URL for the specified Gemini model.
@@ -228,6 +230,20 @@ export class VertexAiApi {
       ],
     };
 
+    if (this._geminiModel.includes('image') && this._imageAspectRatio) {
+      payload['generationConfig'] = {
+        ...payload['generationConfig'],
+        imageConfig: {
+          aspectRatio: this._imageAspectRatio,
+          imageSize: '1K',
+          imageOutputOptions: {
+            mimeType: 'image/png',
+          },
+          personGeneration: 'ALLOW_ALL',
+        },
+      };
+    }
+
     if (!this._geminiModel.includes('image') && responseSchema) {
       payload['generationConfig'] = {
         ...payload['generationConfig'],
@@ -294,13 +310,16 @@ export function queryGemini(
   mimeType: string,
   gcpProjectId: string,
   modelId: string,
-  responseSchema = {}
+  responseSchema = {},
+  imageAspectRatio?: string
 ) {
   return new VertexAiApi(
     gcpProjectId,
     '',
     'aiplatform.googleapis.com',
-    modelId
+    modelId,
+    undefined, // imageGenerationModel is not directly used in callGeminiApi, passing undefined
+    imageAspectRatio
   ).callGeminiApi(
     prompt,
     image,

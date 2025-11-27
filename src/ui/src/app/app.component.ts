@@ -70,6 +70,19 @@ export class AppComponent implements OnInit {
   autoScoreImages = false;
   scoringThreshold = 5;
   maxRegenerations = 1;
+  aspectRatios: string[] = [
+    '1:1',
+    '3:2',
+    '2:3',
+    '3:4',
+    '4:3',
+    '4:5',
+    '5:4',
+    '9:16',
+    '16:9',
+    '21:9',
+  ];
+  selectedAspectRatio: string | null = this.aspectRatios[0];
 
   constructor(private zone: NgZone) {}
 
@@ -113,7 +126,8 @@ export class AppComponent implements OnInit {
         this.numberOfImages,
         this.selectedValues,
         this.autoScoreImages ? this.scoringThreshold : undefined,
-        this.maxRegenerations
+        this.maxRegenerations,
+        this.selectedAspectRatio
       );
   }
 
@@ -128,7 +142,8 @@ export class AppComponent implements OnInit {
         this.numberOfImages,
         undefined,
         this.autoScoreImages ? Number(this.scoringThreshold) : undefined,
-        Number(this.maxRegenerations)
+        Number(this.maxRegenerations),
+        this.selectedAspectRatio
       );
   }
 }
