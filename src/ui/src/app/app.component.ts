@@ -38,7 +38,7 @@ export interface DropdownData {
 }
 
 export interface IngredientsData {
-  [key: string]: { name: string; thumbnail: string }[];
+  [key: string]: { name: string; thumbnail: string; fileId: string }[];
 }
 
 @Component({
@@ -88,18 +88,9 @@ export class AppComponent implements OnInit {
   ];
   selectedAspectRatio: string | null = this.aspectRatios[0];
   ingredientsData: IngredientsData = {};
-  selectedIngredients: { [key: string]: string | null } = {};
-
-  getIngredientThumbnail(ingredientKey: string): string | undefined {
-    const selectedIngredientName = this.selectedIngredients[ingredientKey];
-    if (selectedIngredientName && this.ingredientsData[ingredientKey]) {
-      const selectedIngredient = this.ingredientsData[ingredientKey].find(
-        i => i.name === selectedIngredientName
-      );
-      return selectedIngredient?.thumbnail;
-    }
-    return undefined;
-  }
+  selectedIngredients: {
+    [key: string]: { name: string; thumbnail: string; fileId: string } | null;
+  } = {};
 
   constructor(private zone: NgZone) {}
 
@@ -145,6 +136,11 @@ export class AppComponent implements OnInit {
       numberOfImages: this.numberOfImages,
       selectedValues: this.selectedValues,
     });
+    const selectedIngredientIds: { [key: string]: string | null } = {};
+    for (const key in this.selectedIngredients) {
+      const ingredient = this.selectedIngredients[key];
+      selectedIngredientIds[key] = ingredient ? ingredient.fileId : null;
+    }
     google.script.run
       .withSuccessHandler(() => this.setLoadingToFinished())
       .generateImages(
@@ -153,7 +149,7 @@ export class AppComponent implements OnInit {
         this.autoScoreImages ? this.scoringThreshold : undefined,
         this.maxRegenerations,
         this.selectedAspectRatio,
-        this.selectedIngredients
+        selectedIngredientIds
       );
   }
 
@@ -161,6 +157,11 @@ export class AppComponent implements OnInit {
     console.log('generateAutomatically', {
       numberOfImages: this.numberOfImages,
     });
+    const selectedIngredientIds: { [key: string]: string | null } = {};
+    for (const key in this.selectedIngredients) {
+      const ingredient = this.selectedIngredients[key];
+      selectedIngredientIds[key] = ingredient ? ingredient.fileId : null;
+    }
     this.isLoading = true;
     google.script.run
       .withSuccessHandler(() => this.setLoadingToFinished())
@@ -170,7 +171,7 @@ export class AppComponent implements OnInit {
         this.autoScoreImages ? Number(this.scoringThreshold) : undefined,
         Number(this.maxRegenerations),
         this.selectedAspectRatio,
-        this.selectedIngredients
+        selectedIngredientIds
       );
   }
 }
