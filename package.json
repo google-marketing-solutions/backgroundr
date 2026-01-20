@@ -24,7 +24,7 @@
     "node": ">=12"
   },
   "dependencies": {
-    "@angular/platform-browser": "^19.0.5",
+
     "@google/clasp": "^2.4.2",
     "@google/genai": "^1.19.0",
     "@types/google-apps-script": "^1.0.69",

@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import { Config } from './config';
-import { ensureFolderExists, getFileById, listFiles } from './drive-api';
-import { queryGemini } from './gemini';
-import { OnePrompt } from './one-prompt';
+import {Config} from './config';
+import {
+  ensureFolderExists,
+  getFileById,
+  getFolderById,
+  listFiles,
+  writeToDrive,
+} from './drive-api';
+import {queryGemini} from './gemini';
+import {OnePrompt} from './one-prompt';
 
 const HEADER_ROWS = 1;
 const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
@@ -52,6 +58,7 @@ function onOpen() {
     .createMenu('BackgroundR on 🍌s')
     .addItem('🎨 Open configurator', 'showSidebar')
     .addItem('📥 Load images from Google Drive', 'getImagesFromDrive')
+    .addItem('💾 Save selected images to Drive', 'saveSelectedImagesToDrive')
     .addItem('🧹 Clear generated images', 'clearGeneratedImages')
     .addToUi();
 }
@@ -413,6 +420,97 @@ const addFolderToQueue = (
     ...backgroundDefinitions.map(e => e.description),
   ]);
   SpreadsheetApp.getActive().setActiveSheet(SCALED_SHEET);
+};
+
+function saveSelectedImagesToDrive() {
+  const imagesToSave: { base64: string; mimeType: string }[] = [];
+  const selection = SpreadsheetApp.getActive().getSelection();
+  const ranges = selection.getActiveRangeList()?.getRanges() || [];
+
+  ranges.forEach(range => {
+    // getValues() returns CellImage objects, getDisplayValues() returns strings (often empty for images)
+    const values = range.getValues();
+    values.forEach(row => {
+      row.forEach(cellValue => {
+        if (isCellImage(cellValue)) {
+          try {
+            const url = cellValue.getContentUrl();
+            const response = UrlFetchApp.fetch(url);
+            const blob = response.getBlob();
+            imagesToSave.push({
+              mimeType: blob.getContentType() || 'image/png',
+              base64: Utilities.base64Encode(blob.getBytes()),
+            });
+          } catch (e) {
+            console.error('Failed to fetch CellImage content', e);
+          }
+        } else if (
+          typeof cellValue === 'string' &&
+          cellValue.startsWith('data:image/')
+        ) {
+          const match = cellValue.match(/^data:(image\/[^;]+);base64,(.+)$/);
+          if (match) {
+            imagesToSave.push({
+              mimeType: match[1],
+              base64: match[2],
+            });
+          }
+        }
+      });
+    });
+  });
+
+  if (imagesToSave.length === 0) {
+    SpreadsheetApp.getActive().toast('No images found in selection', 'Error');
+    return;
+  }
+
+  const parentFolderId = CONFIG['Drive Folder Id'];
+  if (!parentFolderId) {
+    SpreadsheetApp.getActive().toast('Drive Folder Id not configured', 'Error');
+    return;
+  }
+
+  const timestamp = Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    'yyyy-MM-dd HH:mm:ss'
+  );
+  const folderName = `${timestamp}`;
+  let folderId: string;
+  try {
+    const parent = getFolderById(parentFolderId);
+    const newFolder = parent.createFolder(folderName);
+    folderId = newFolder.getId();
+  } catch (e) {
+    console.error(e);
+    SpreadsheetApp.getActive().toast(
+      'Failed to create folder. Check permissions/ID.',
+      'Error'
+    );
+    return;
+  }
+
+  let savedCount = 0;
+  imagesToSave.forEach((img, index) => {
+    try {
+      writeToDrive(folderId, `image_${index + 1}`, img.base64, img.mimeType);
+      savedCount++;
+    } catch (e) {
+      console.error(`Failed to save image ${index + 1}`, e);
+    }
+  });
+
+  SpreadsheetApp.getActive().toast(
+    `Saved ${savedCount} images to folder "${folderName}"`,
+    'Success'
+  );
+}
+
+const isCellImage = (
+  value: unknown
+): value is GoogleAppsScript.Spreadsheet.CellImage => {
+  return typeof value === 'object' && value !== null && 'getContentUrl' in value;
 };
 
 const getOAuthToken = () => {
