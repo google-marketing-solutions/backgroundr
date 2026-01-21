@@ -46,9 +46,13 @@ export class OnePrompt {
 
     const promptParts: PromptPart[] = [{ type: 'text', value: textPrompt }];
 
+    const hasActiveParts = Object.values(partsAsObject).some(
+      val => val && (Array.isArray(val) ? val.length > 0 : true)
+    );
+
     if (ingredientsAsObject) {
       for (const [name, fileId] of Object.entries(ingredientsAsObject)) {
-        if (fileId) {
+        if (fileId && (!hasActiveParts || partsAsObject[name])) {
           const file = getFileById(fileId);
           const blob = file.getBlob();
           const base64Data = Utilities.base64Encode(blob.getBytes());
