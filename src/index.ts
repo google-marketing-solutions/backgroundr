@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Config} from './config';
+import { Config } from './config';
 import {
   ensureFolderExists,
   getFileById,
@@ -22,8 +22,8 @@ import {
   listFiles,
   writeToDrive,
 } from './drive-api';
-import {queryGemini} from './gemini';
-import {OnePrompt} from './one-prompt';
+import { queryGemini } from './gemini';
+import { OnePrompt } from './one-prompt';
 
 const HEADER_ROWS = 1;
 const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
@@ -423,14 +423,61 @@ const addFolderToQueue = (
 };
 
 function saveSelectedImagesToDrive() {
-  const imagesToSave: { base64: string; mimeType: string }[] = [];
+  const imagesToSave: {
+    base64: string;
+    mimeType: string;
+    fileName?: string;
+  }[] = [];
   const selection = SpreadsheetApp.getActive().getSelection();
   const ranges = selection.getActiveRangeList()?.getRanges() || [];
+  const activeSheet = SpreadsheetApp.getActive().getActiveSheet();
+  const isImageSheet = activeSheet.getName() === 'Images';
+  const fileNameCache = new Map<string, string>();
 
   ranges.forEach(range => {
+    // Determine if we can fetch original names (only works reliably on Images sheet)
+    const sheet = range.getSheet();
+    const canFetchOriginalName = isImageSheet && sheet.getName() === 'Images';
+    const startRow = range.getRow();
+    const numRows = range.getNumRows();
+
+    let rowIds: string[] = [];
+    if (canFetchOriginalName) {
+      try {
+        // Column 2 (B) contains the Drive ID in the Images sheet
+        rowIds = sheet
+          .getRange(startRow, 2, numRows, 1)
+          .getValues()
+          .map(v => String(v[0]));
+      } catch (e) {
+        console.warn('Failed to fetch Drive IDs from column B', e);
+      }
+    }
+
     // getValues() returns CellImage objects, getDisplayValues() returns strings (often empty for images)
     const values = range.getValues();
-    values.forEach(row => {
+    values.forEach((row, rowIndex) => {
+      // Resolve original file name for this row
+      let originalName = '';
+      if (canFetchOriginalName && rowIds[rowIndex]) {
+        const driveId = rowIds[rowIndex];
+        if (driveId) {
+          if (fileNameCache.has(driveId)) {
+            originalName = fileNameCache.get(driveId)!;
+          } else {
+            try {
+              const file = getFileById(driveId);
+              const name = file.getName();
+              // Strip extension
+              originalName = name.replace(/\.[^/.]+$/, '');
+              fileNameCache.set(driveId, originalName);
+            } catch (e) {
+              console.warn(`Could not get file for id ${driveId}`, e);
+            }
+          }
+        }
+      }
+
       row.forEach(cellValue => {
         if (isCellImage(cellValue)) {
           try {
@@ -440,6 +487,7 @@ function saveSelectedImagesToDrive() {
             imagesToSave.push({
               mimeType: blob.getContentType() || 'image/png',
               base64: Utilities.base64Encode(blob.getBytes()),
+              fileName: originalName ? `${originalName}_generated` : undefined,
             });
           } catch (e) {
             console.error('Failed to fetch CellImage content', e);
@@ -453,6 +501,7 @@ function saveSelectedImagesToDrive() {
             imagesToSave.push({
               mimeType: match[1],
               base64: match[2],
+              fileName: originalName ? `${originalName}_generated` : undefined,
             });
           }
         }
@@ -494,7 +543,8 @@ function saveSelectedImagesToDrive() {
   let savedCount = 0;
   imagesToSave.forEach((img, index) => {
     try {
-      writeToDrive(folderId, `image_${index + 1}`, img.base64, img.mimeType);
+      const name = img.fileName || `image_${index + 1}`;
+      writeToDrive(folderId, name, img.base64, img.mimeType);
       savedCount++;
     } catch (e) {
       console.error(`Failed to save image ${index + 1}`, e);
@@ -510,7 +560,9 @@ function saveSelectedImagesToDrive() {
 const isCellImage = (
   value: unknown
 ): value is GoogleAppsScript.Spreadsheet.CellImage => {
-  return typeof value === 'object' && value !== null && 'getContentUrl' in value;
+  return (
+    typeof value === 'object' && value !== null && 'getContentUrl' in value
+  );
 };
 
 const getOAuthToken = () => {
