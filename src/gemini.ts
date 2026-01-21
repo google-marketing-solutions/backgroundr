@@ -93,7 +93,19 @@ export class VertexAiApi {
    * @returns {string} The complete API endpoint URL for making requests to the model.
    */
   protected getEndPoint(model: string, suffix: string) {
-    return `https://aiplatform.googleapis.com/v1/projects/${this._projectId}/locations/global/publishers/google/models/${model}:${suffix}`;
+    const region = this._region || 'global';
+    console.log(
+      `https://aiplatform.googleapis.com/v1/projects/${this._projectId}/locations/${region}/publishers/google/models/${model}:${suffix}`
+    );
+    return `https://aiplatform.googleapis.com/v1/projects/${this._projectId}/locations/${region}/publishers/google/models/${model}:${suffix}`;
+    /*
+    return (
+      `https://${this._region}-${this._apiEndpoint}/v1/projects/` +
+      `${this._projectId}/locations/${this._region}/publishers/google/models/` +
+      model +
+      `:${suffix}`
+    );
+    */
   }
   /**
    * Returns the specific API endpoint URL for the Gemini text model.
@@ -305,11 +317,12 @@ export function queryGemini(
   gcpProjectId: string,
   modelId: string,
   responseSchema = {},
-  imageAspectRatio?: string
+  imageAspectRatio?: string,
+  region?: string
 ) {
   return new VertexAiApi(
     gcpProjectId,
-    '',
+    region,
     'aiplatform.googleapis.com',
     modelId,
     undefined,
