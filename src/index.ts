@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { Config } from './config';
 import { ensureFolderExists, getFileById, listFiles } from './drive-api';
-import { queryGemini } from './gemini';
+import { queryGemini, PromptPart } from './gemini';
 import { OnePrompt } from './one-prompt';
 
 const HEADER_ROWS = 1;
@@ -26,7 +25,7 @@ const CONFIG = Config.readConfig();
 
 interface BackgroundDefinition {
   title?: string;
-  description: string;
+  description: PromptPart[];
 }
 
 interface ImageQueue {
@@ -101,7 +100,7 @@ function loadIngredients() {
   }
 
   const ingredientsAsObject: {
-    [key: string]: { name: string; thumbnail: string }[];
+    [key: string]: { name: string; thumbnail: string; fileId: string }[];
   } = {};
   const headers = parts.shift(); // Remove header row
 
@@ -116,11 +115,13 @@ function loadIngredients() {
             if (blob) {
               const blobBase64 = Utilities.base64Encode(blob.getBytes());
               return {
+                fileId: f.getId(),
                 name: f.getName(),
                 thumbnail: `data:${blob.getContentType()};base64,${blobBase64}`,
               };
             } else {
               return {
+                fileId: f.getId(),
                 name: f.getName(),
                 thumbnail: '',
               };
@@ -131,6 +132,7 @@ function loadIngredients() {
               e
             );
             return {
+              fileId: f.getId(),
               name: f.getName(),
               thumbnail: '',
             };
@@ -148,15 +150,16 @@ function loadIngredients() {
 function generateImages(
   numberOfImages = 1,
   partsAsObject?: {
-    [key: string]: string[];
+    [key: string]: string | null;
   },
   scoringThreshold?: number,
   maxRegenerations?: number,
   imageAspectRatio?: string,
   ingredientsAsObject?: {
-    [key: string]: string[];
+    [key: string]: string | null;
   }
 ) {
+  console.log('---ingredientsAsObject---', ingredientsAsObject);
   console.log('generateImages', {
     numberOfImages,
     partsAsObject,
@@ -173,20 +176,22 @@ function generateImages(
         partsAsObject,
         prefix,
         suffix,
-        ingredientsAsObject
+        ingredientsAsObject as { [key: string]: string | null } | undefined
       )
     : OnePrompt.generatePromptForSheet(
         CONFIG['Dropdowns sheet'],
         prefix,
         suffix,
-        ingredientsAsObject
+        ingredientsAsObject as { [key: string]: string | null } | undefined
       );
 
   console.log({ prompt });
 
-  const manyPrompts = new Array(numberOfImages).fill(prompt).map(p => ({
-    description: p,
-  }));
+  const manyPrompts: BackgroundDefinition[] = new Array(numberOfImages)
+    .fill(prompt)
+    .map(p => ({
+      description: p,
+    }));
 
   return processImageAssets(
     manyPrompts,
@@ -405,13 +410,11 @@ const processImageAssets = (
               attemptNumber++
             ) {
               console.log(
-                `Attempt ${attemptNumber + 1} to generate image for "${
-                  e.description
-                }"`
+                `Attempt ${attemptNumber + 1} to generate image for prompt`
               );
               resultImageBase64 = queryGemini(
                 [
-                  { type: 'text', value: e.description },
+                  ...e.description,
                   { type: 'image', value: base64Data, mimeType: mimeType },
                 ],
                 CONFIG['Cloud Project Id'],
@@ -443,7 +446,7 @@ const processImageAssets = (
           } else {
             resultImageBase64 = queryGemini(
               [
-                { type: 'text', value: e.description },
+                ...e.description,
                 { type: 'image', value: base64Data, mimeType: mimeType },
               ],
               CONFIG['Cloud Project Id'],

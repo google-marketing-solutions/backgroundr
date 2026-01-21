@@ -132,6 +132,7 @@ export class AppComponent implements OnInit {
 
   generateSelected() {
     this.isLoading = true;
+    console.log('selectedIngredients', this.selectedIngredients);
     console.log('generateAutomatically', {
       numberOfImages: this.numberOfImages,
       selectedValues: this.selectedValues,
