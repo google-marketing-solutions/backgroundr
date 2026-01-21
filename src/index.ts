@@ -204,7 +204,7 @@ function generateImages(
   return processImageAssets(
     manyPrompts,
     CONFIG['Cloud Project Id'],
-    '',
+    CONFIG['GCP Location'],
     CONFIG['Image Generation Model'],
     scoringThreshold,
     maxRegenerations,
@@ -310,7 +310,8 @@ const scoreImage = (image: string) => {
     ],
     CONFIG['Cloud Project Id'],
     CONFIG['Scoring Model'],
-    responseSchema
+    responseSchema,
+    CONFIG['GCP Location']
   );
   console.log({ geminiResponse });
 
@@ -367,7 +368,7 @@ const addToScoringSheet = (
 const processImageAssets = (
   backgroundDefinitions: BackgroundDefinition[],
   projectId: string,
-  region: string,
+  region: string = '',
   modelId: string,
   scoringThreshold?: number,
   maxRegenerations?: number,
@@ -428,7 +429,8 @@ const processImageAssets = (
                 CONFIG['Cloud Project Id'],
                 CONFIG['Image Generation Model'],
                 {},
-                imageAspectRatio
+                imageAspectRatio,
+                CONFIG['GCP Location']
               );
               const imageScore = scoreImage(base64Data);
               console.log(`Image score: ${imageScore}`);
@@ -460,7 +462,8 @@ const processImageAssets = (
               CONFIG['Cloud Project Id'],
               CONFIG['Image Generation Model'],
               {},
-              imageAspectRatio
+              imageAspectRatio,
+              CONFIG['GCP Location']
             );
           }
           return SpreadsheetApp.newCellImage()
