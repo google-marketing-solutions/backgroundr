@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Config } from './config';
+import {Config} from './config';
 import {
   ensureFolderExists,
   getFileById,
@@ -21,8 +21,9 @@ import {
   listFiles,
   writeToDrive,
 } from './drive-api';
-import { PromptPart, queryGemini } from './gemini';
-import { OnePrompt } from './one-prompt';
+import {PromptPart, queryGemini} from './gemini';
+import {getImageResolution} from './image-utils';
+import {OnePrompt} from './one-prompt';
 
 const HEADER_ROWS = 1;
 const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
@@ -572,10 +573,16 @@ function saveSelectedImagesToDrive() {
             const url = cellValue.getContentUrl();
             const response = UrlFetchApp.fetch(url);
             const blob = response.getBlob();
+            const resolution = getImageResolution(blob);
+            let suffix = '_generated';
+            if (resolution) {
+              suffix += `_${resolution.width}x${resolution.height}`;
+            }
+
             imagesToSave.push({
               mimeType: blob.getContentType() || 'image/png',
               base64: Utilities.base64Encode(blob.getBytes()),
-              fileName: originalName ? `${originalName}_generated` : undefined,
+              fileName: originalName ? `${originalName}${suffix}` : undefined,
             });
           } catch (e) {
             console.error('Failed to fetch CellImage content', e);
@@ -586,10 +593,26 @@ function saveSelectedImagesToDrive() {
         ) {
           const match = cellValue.match(/^data:(image\/[^;]+);base64,(.+)$/);
           if (match) {
+            const mimeType = match[1];
+            const base64 = match[2];
+            let suffix = '_generated';
+            try {
+              const blob = Utilities.newBlob(
+                Utilities.base64Decode(base64),
+                mimeType
+              );
+              const resolution = getImageResolution(blob);
+              if (resolution) {
+                suffix += `_${resolution.width}x${resolution.height}`;
+              }
+            } catch (e) {
+              console.warn('Failed to get resolution from base64 string', e);
+            }
+
             imagesToSave.push({
-              mimeType: match[1],
-              base64: match[2],
-              fileName: originalName ? `${originalName}_generated` : undefined,
+              mimeType,
+              base64,
+              fileName: originalName ? `${originalName}${suffix}` : undefined,
             });
           }
         }
@@ -615,10 +638,12 @@ function saveSelectedImagesToDrive() {
   );
   const folderName = `${timestamp}`;
   let folderId: string;
+  let folderUrl: string;
   try {
     const parent = getFolderById(parentFolderId);
     const newFolder = parent.createFolder(folderName);
     folderId = newFolder.getId();
+    folderUrl = newFolder.getUrl();
   } catch (e) {
     console.error(e);
     SpreadsheetApp.getActive().toast(
@@ -639,10 +664,12 @@ function saveSelectedImagesToDrive() {
     }
   });
 
-  SpreadsheetApp.getActive().toast(
-    `Saved ${savedCount} images to folder "${folderName}"`,
-    'Success'
-  );
+  const html = HtmlService.createHtmlOutput(
+    `<p>Saved ${savedCount} images to folder <a href="${folderUrl}" target="_blank">${folderName}</a></p>`
+  )
+    .setWidth(300)
+    .setHeight(80);
+  SpreadsheetApp.getUi().showModelessDialog(html, 'Images Saved');
 }
 
 const isCellImage = (
