@@ -21,7 +21,7 @@ limitations under the License.
 ></mat-progress-bar>
 <div class="main-content">
   <h1 style="text-align: center">BackgroundR on 🍌s!</h1>
-  <mat-card class="dropdown-container">
+  <mat-card class="dropdown-container" *ngIf="(dropdownsData | keyvalue).length > 0">
     <mat-card-header>
       <mat-card-title>Customise your variants</mat-card-title>
     </mat-card-header>
@@ -37,17 +37,45 @@ limitations under the License.
           </mat-select>
         </mat-form-field>
       </div>
-      <button
-        mat-raised-button
-        color="secondary"
-        [disabled]="isLoading"
-        class="button"
-        (click)="loadDropDowns()"
-      >
-        🔄 Reload Dropdowns
-      </button>
+      </mat-card-content>
+  </mat-card>
+  <mat-card class="dropdown-container" *ngIf="(ingredientsData | keyvalue).length > 0">
+    <mat-card-header>
+      <mat-card-title>Ingredients</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngFor="let ingredient of ingredientsData | keyvalue">
+        <mat-form-field>
+          <mat-label>{{ ingredient.key }}</mat-label>
+          <mat-select [(value)]="selectedIngredients[ingredient.key]">
+            <mat-select-trigger>
+              <img *ngIf="selectedIngredients[ingredient.key]?.thumbnail" [src]="selectedIngredients[ingredient.key]?.thumbnail" class="ingredient-thumbnail" />
+              <span>{{ selectedIngredients[ingredient.key]?.name }}</span>
+            </mat-select-trigger>
+            <mat-option [value]="null"> -- </mat-option>
+            <mat-option
+              *ngFor="let value of ingredient.value"
+              [value]="value"
+            >
+              <img *ngIf="value.thumbnail" [src]="value.thumbnail" class="ingredient-thumbnail" />
+              <span>{{ value.name }}</span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </mat-card-content>
   </mat-card>
+  <div class="button-container">
+    <button
+      mat-raised-button
+      color="secondary"
+      [disabled]="isLoading"
+      class="button"
+      (click)="loadDropDowns()"
+    >
+      🔄 Reload Dropdowns
+    </button>
+  </div>
   <mat-card class="other-settings">
     <mat-card-header>
       <mat-card-title>Other settings</mat-card-title>
@@ -61,6 +89,15 @@ limitations under the License.
           [(ngModel)]="numberOfImages"
           placeholder="Number of images to generate"
         />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Aspect Ratio</mat-label>
+        <mat-select [(ngModel)]="selectedAspectRatio">
+          <mat-option *ngFor="let ratio of aspectRatios" [value]="ratio">
+            {{ ratio }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <mat-slide-toggle [(ngModel)]="autoScoreImages">

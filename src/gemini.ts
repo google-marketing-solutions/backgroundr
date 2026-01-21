@@ -74,13 +74,15 @@ export class VertexAiApi {
    * @param {string} [_apiEndpoint='aiplatform.googleapis.com'] - The base API endpoint for Gemini. Usually, you won't need to change this.
    * @param {string} [_geminiModel='gemini-1.5-flash'] - The specific Gemini model for text generation tasks (e.g., 'gemini-1.5-flash'). Defaults to the latest flash model.
    * @param {string} [_imageGenerationModel='imagegeneration'] - The model for image generation tasks.
+   * @param {string} [_imageAspectRatio] - The aspect ratio for image generation tasks.
    */
   constructor(
     private _projectId: string,
     private _region = 'us-central1',
     private _apiEndpoint = 'aiplatform.googleapis.com',
     private _geminiModel = 'gemini-1.5-flash',
-    private _imageGenerationModel = 'imagegeneration'
+    private _imageGenerationModel = 'imagegeneration',
+    private _imageAspectRatio?: string
   ) {}
   /**
    * Constructs the API endpoint URL for the specified Gemini model.
@@ -91,18 +93,7 @@ export class VertexAiApi {
    * @returns {string} The complete API endpoint URL for making requests to the model.
    */
   protected getEndPoint(model: string, suffix: string) {
-    console.log(
-      `https://aiplatform.googleapis.com/v1/projects/${this._projectId}/locations/global/publishers/google/models/${model}:${suffix}`
-    );
     return `https://aiplatform.googleapis.com/v1/projects/${this._projectId}/locations/global/publishers/google/models/${model}:${suffix}`;
-    /*
-    return (
-      `https://${this._region}-${this._apiEndpoint}/v1/projects/` +
-      `${this._projectId}/locations/${this._region}/publishers/google/models/` +
-      model +
-      `:${suffix}`
-    );
-    */
   }
   /**
    * Returns the specific API endpoint URL for the Gemini text model.
@@ -175,20 +166,21 @@ export class VertexAiApi {
    * @remarks
    * Note: Only one of `fileUri` or `image` should be provided. If both are provided, `image` will be ignored.
    */
-  callGeminiApi(
-    text: string,
-    image = '',
-    mimeType = 'image/jpg',
-    json = false,
-    responseSchema = {}
-  ) {
+  callGeminiApi(promptParts: PromptPart[], json = false, responseSchema = {}) {
     const options = Object.assign({}, this._baseOptions);
 
-    const parts: GeminiRequest[] = [{ text }];
-    if (image) {
-      parts.push({
-        inlineData: { data: image, mimeType },
-      });
+    const parts: GeminiRequest[] = [];
+    for (const part of promptParts) {
+      if (part.type === 'text') {
+        parts.push({ text: part.value });
+      } else if (part.type === 'image') {
+        parts.push({
+          inlineData: {
+            data: part.value,
+            mimeType: part.mimeType || 'image/jpeg',
+          },
+        });
+      }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -227,6 +219,20 @@ export class VertexAiApi {
         },
       ],
     };
+
+    if (this._geminiModel.includes('image') && this._imageAspectRatio) {
+      payload['generationConfig'] = {
+        ...payload['generationConfig'],
+        imageConfig: {
+          aspectRatio: this._imageAspectRatio,
+          imageSize: '1K',
+          imageOutputOptions: {
+            mimeType: 'image/png',
+          },
+          personGeneration: 'ALLOW_ALL',
+        },
+      };
+    }
 
     if (!this._geminiModel.includes('image') && responseSchema) {
       payload['generationConfig'] = {
@@ -288,24 +294,25 @@ export class VertexAiApi {
   }
 }
 
+export interface PromptPart {
+  type: 'text' | 'image';
+  value: string; // For text, the string content; for image, base64 data.
+  mimeType?: string; // Required for image parts.
+}
+
 export function queryGemini(
-  prompt: string,
-  image: string,
-  mimeType: string,
+  promptParts: PromptPart[],
   gcpProjectId: string,
   modelId: string,
-  responseSchema = {}
+  responseSchema = {},
+  imageAspectRatio?: string
 ) {
   return new VertexAiApi(
     gcpProjectId,
     '',
     'aiplatform.googleapis.com',
-    modelId
-  ).callGeminiApi(
-    prompt,
-    image,
-    mimeType,
-    !modelId.includes('image'),
-    responseSchema
-  );
+    modelId,
+    undefined,
+    imageAspectRatio
+  ).callGeminiApi(promptParts, !modelId.includes('image'), responseSchema);
 }

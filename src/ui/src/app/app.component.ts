@@ -37,6 +37,10 @@ export interface DropdownData {
   [key: string]: string[];
 }
 
+export interface IngredientsData {
+  [key: string]: { name: string; thumbnail: string; fileId: string }[];
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -70,6 +74,23 @@ export class AppComponent implements OnInit {
   autoScoreImages = false;
   scoringThreshold = 5;
   maxRegenerations = 1;
+  aspectRatios: string[] = [
+    '1:1',
+    '3:2',
+    '2:3',
+    '3:4',
+    '4:3',
+    '4:5',
+    '5:4',
+    '9:16',
+    '16:9',
+    '21:9',
+  ];
+  selectedAspectRatio: string | null = this.aspectRatios[0];
+  ingredientsData: IngredientsData = {};
+  selectedIngredients: {
+    [key: string]: { name: string; thumbnail: string; fileId: string } | null;
+  } = {};
 
   constructor(private zone: NgZone) {}
 
@@ -85,13 +106,21 @@ export class AppComponent implements OnInit {
   loadDropDowns() {
     this.isLoading = true;
     google.script.run
-      .withSuccessHandler((dropdowns: DropdownData) => {
-        this.zone.run(() => {
-          this.dropdownsData = dropdowns;
-          console.log('dropdownsData', this.dropdownsData);
-          this.isLoading = false;
-        });
-      })
+      .withSuccessHandler(
+        (dropdowns: {
+          variants: DropdownData;
+          ingredients: IngredientsData;
+        }) => {
+          this.zone.run(() => {
+            this.dropdownsData = dropdowns.variants;
+            this.ingredientsData = dropdowns.ingredients;
+            for (const key in this.ingredientsData) {
+              this.selectedIngredients[key] = null;
+            }
+            this.isLoading = false;
+          });
+        }
+      )
       .loadDropDowns();
   }
 
@@ -103,17 +132,25 @@ export class AppComponent implements OnInit {
 
   generateSelected() {
     this.isLoading = true;
+    console.log('selectedIngredients', this.selectedIngredients);
     console.log('generateAutomatically', {
       numberOfImages: this.numberOfImages,
       selectedValues: this.selectedValues,
     });
+    const selectedIngredientIds: { [key: string]: string | null } = {};
+    for (const key in this.selectedIngredients) {
+      const ingredient = this.selectedIngredients[key];
+      selectedIngredientIds[key] = ingredient ? ingredient.fileId : null;
+    }
     google.script.run
       .withSuccessHandler(() => this.setLoadingToFinished())
       .generateImages(
         this.numberOfImages,
         this.selectedValues,
         this.autoScoreImages ? this.scoringThreshold : undefined,
-        this.maxRegenerations
+        this.maxRegenerations,
+        this.selectedAspectRatio,
+        selectedIngredientIds
       );
   }
 
@@ -121,6 +158,11 @@ export class AppComponent implements OnInit {
     console.log('generateAutomatically', {
       numberOfImages: this.numberOfImages,
     });
+    const selectedIngredientIds: { [key: string]: string | null } = {};
+    for (const key in this.selectedIngredients) {
+      const ingredient = this.selectedIngredients[key];
+      selectedIngredientIds[key] = ingredient ? ingredient.fileId : null;
+    }
     this.isLoading = true;
     google.script.run
       .withSuccessHandler(() => this.setLoadingToFinished())
@@ -128,7 +170,9 @@ export class AppComponent implements OnInit {
         this.numberOfImages,
         undefined,
         this.autoScoreImages ? Number(this.scoringThreshold) : undefined,
-        Number(this.maxRegenerations)
+        Number(this.maxRegenerations),
+        this.selectedAspectRatio,
+        selectedIngredientIds
       );
   }
 }

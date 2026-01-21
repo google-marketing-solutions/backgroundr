@@ -13,22 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { getFileById } from './drive-api';
+import { PromptPart } from './gemini';
+
 export class OnePrompt {
   static generatePromptForSheet(
     sheetName: string,
     promptPrefix = '',
-    promptSuffix = ''
-  ) {
+    promptSuffix = '',
+    ingredientsAsObject?: { [key: string]: string | null }
+  ): PromptPart[] {
     const partsAsObject = OnePrompt.getDropdowns(sheetName);
-    return OnePrompt.generatePrompt(partsAsObject, promptPrefix, promptSuffix);
+    return OnePrompt.generatePrompt(
+      partsAsObject,
+      promptPrefix,
+      promptSuffix,
+      ingredientsAsObject
+    );
   }
 
   static generatePrompt(
-    partsAsObject: { [key: string]: string[] },
+    partsAsObject: { [key: string]: string | null | string[] },
+    promptPrefix = '',
+    promptSuffix = '',
+    ingredientsAsObject?: { [key: string]: string | null }
+  ): PromptPart[] {
+    const textPrompt = OnePrompt.generateTextPrompt(
+      partsAsObject,
+      promptPrefix,
+      promptSuffix
+    );
+
+    const promptParts: PromptPart[] = [{ type: 'text', value: textPrompt }];
+
+    if (ingredientsAsObject) {
+      for (const [name, fileId] of Object.entries(ingredientsAsObject)) {
+        if (fileId) {
+          const file = getFileById(fileId);
+          const blob = file.getBlob();
+          const base64Data = Utilities.base64Encode(blob.getBytes());
+          promptParts.push({
+            type: 'text',
+            value: `Use only the following ${name}`,
+          });
+          promptParts.push({
+            type: 'image',
+            value: base64Data,
+            mimeType: blob.getContentType() ?? undefined,
+          });
+        }
+      }
+    }
+
+    return promptParts;
+  }
+
+  static generateTextPrompt(
+    partsAsObject: { [key: string]: string | null | string[] },
     promptPrefix = '',
     promptSuffix = ''
   ) {
-    const promptParts = OnePrompt.generatePromptParts(partsAsObject);
+    const promptParts = OnePrompt.generateTextPromptParts(partsAsObject);
     return (
       (promptPrefix ? promptPrefix + '\n\n' : '') +
       promptParts.join('\n\n') +
@@ -36,16 +81,22 @@ export class OnePrompt {
     );
   }
 
-  static generatePromptParts(partsAsObject: { [key: string]: string[] }) {
+  static generateTextPromptParts(partsAsObject: {
+    [key: string]: string | null | string[];
+  }) {
     const promptParts: string[] = [];
     for (const partType in partsAsObject) {
-      const promptForPart =
-        `### ${partType}:\n` +
-        (partsAsObject[partType] instanceof Array
-          ? partsAsObject[partType].map(p => `* ${p}`).join('\n')
-          : `* ${partsAsObject[partType]}`);
-
-      promptParts.push(promptForPart);
+      const partValue = partsAsObject[partType];
+      if (partValue) {
+        if (partValue instanceof Array) {
+          const promptForPart =
+            `### ${partType}:\n` + partValue.map(p => `* ${p}`).join('\n');
+          promptParts.push(promptForPart);
+        } else {
+          const promptForPart = `### ${partType}:\n* ${partValue}`;
+          promptParts.push(promptForPart);
+        }
+      }
     }
     return promptParts;
   }
