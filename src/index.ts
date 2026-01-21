@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Config} from './config';
+import { Config } from './config';
 import {
   ensureFolderExists,
   getFileById,
@@ -21,9 +21,9 @@ import {
   listFiles,
   writeToDrive,
 } from './drive-api';
-import {PromptPart, queryGemini} from './gemini';
-import {getImageResolution} from './image-utils';
-import {OnePrompt} from './one-prompt';
+import { PromptPart, queryGemini } from './gemini';
+import { getImageResolution } from './image-utils';
+import { OnePrompt } from './one-prompt';
 
 const HEADER_ROWS = 1;
 const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
@@ -311,6 +311,7 @@ const scoreImage = (image: string) => {
     CONFIG['Cloud Project Id'],
     CONFIG['Scoring Model'],
     responseSchema,
+    undefined,
     CONFIG['GCP Location']
   );
   console.log({ geminiResponse });
@@ -432,7 +433,7 @@ const processImageAssets = (
                 imageAspectRatio,
                 CONFIG['GCP Location']
               );
-              const imageScore = scoreImage(base64Data);
+              const imageScore = scoreImage(resultImageBase64);
               console.log(`Image score: ${imageScore}`);
 
               const cell = IMAGE_SHEET.getRange(
