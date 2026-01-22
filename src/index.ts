@@ -86,9 +86,13 @@ function loadDropDowns() {
   const config = Config.readConfig();
   const dropdownsData = OnePrompt.getDropdowns(config['Dropdowns sheet']);
   const ingredientsData = loadIngredients();
+  const elementsMenu = OnePrompt.getElementsMenu(
+    config['Elements Menu sheet'] || 'Elements Menu'
+  );
   return {
     variants: dropdownsData,
     ingredients: ingredientsData,
+    menus: elementsMenu,
   };
 }
 

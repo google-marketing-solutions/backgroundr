@@ -132,4 +132,47 @@ export class OnePrompt {
 
     return partsAsObject;
   }
+
+  static getElementsMenu(sheetName: string) {
+    if (!SpreadsheetApp?.getActiveSpreadsheet()?.getSheetByName(sheetName)) {
+      throw new Error(`Sheet ${sheetName} not found`);
+    }
+
+    const sheet =
+      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    const lastColumn = sheet?.getLastColumn();
+    const lastRow = sheet?.getLastRow();
+
+    if (!lastColumn || !lastRow || lastColumn < 2) {
+      return [];
+    }
+
+    // Get all data starting from column B (index 2)
+    const data = sheet
+      ?.getRange(1, 2, lastRow, lastColumn - 1)
+      .getDisplayValues();
+
+    if (!data || !data.length) {
+      return [];
+    }
+
+    const headers = data[0];
+    const menus: { title: string; items: string[] }[] = [];
+
+    headers.forEach((title, index) => {
+      if (title) {
+        const items = data
+          .slice(1) // Skip header row
+          .map(row => row[index])
+          .filter(item => item && item !== ''); // Filter empty cells
+
+        menus.push({
+          title: title,
+          items: items,
+        });
+      }
+    });
+
+    return menus;
+  }
 }

@@ -21,50 +21,96 @@ limitations under the License.
 ></mat-progress-bar>
 <div class="main-content">
   <h1 style="text-align: center">BackgroundR on 🍌s!</h1>
-  <mat-card class="dropdown-container" *ngIf="(dropdownsData | keyvalue).length > 0">
-    <mat-card-header>
-      <mat-card-title>Customise your variants</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngFor="let dropdown of dropdownsData | keyvalue">
-        <mat-form-field>
-          <mat-label>{{ dropdown.key }}</mat-label>
-          <mat-select [(value)]="selectedValues[dropdown.key]">
-            <mat-option [value]="null"> -- </mat-option>
-            <mat-option *ngFor="let value of dropdown.value" [value]="value">
-              {{ value }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+  <ng-container *ngFor="let menu of menus">
+    <mat-card class="dropdown-container">
+      <mat-card-header>
+        <mat-card-title>{{ menu.title }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let item of menu.items">
+          <ng-container *ngIf="dropdownsData[item]">
+            <mat-form-field>
+              <mat-label>{{ item }}</mat-label>
+              <mat-select [(value)]="selectedValues[item]">
+                <mat-option [value]="null"> -- </mat-option>
+                <mat-option *ngFor="let value of dropdownsData[item]" [value]="value">
+                  {{ value }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </ng-container>
+
+          <ng-container *ngIf="ingredientsData[item]">
+            <mat-form-field>
+              <mat-label>{{ item }}</mat-label>
+              <mat-select [(value)]="selectedIngredients[item]">
+                <mat-select-trigger>
+                  <img *ngIf="selectedIngredients[item]?.thumbnail" [src]="selectedIngredients[item]?.thumbnail" class="ingredient-thumbnail" />
+                  <span>{{ selectedIngredients[item]?.name }}</span>
+                </mat-select-trigger>
+                <mat-option [value]="null"> -- </mat-option>
+                <mat-option
+                  *ngFor="let value of ingredientsData[item]"
+                  [value]="value"
+                >
+                  <img *ngIf="value.thumbnail" [src]="value.thumbnail" class="ingredient-thumbnail" />
+                  <span>{{ value.name }}</span>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </ng-container>
+        </div>
       </mat-card-content>
-  </mat-card>
-  <mat-card class="dropdown-container" *ngIf="(ingredientsData | keyvalue).length > 0">
-    <mat-card-header>
-      <mat-card-title>Ingredients</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngFor="let ingredient of ingredientsData | keyvalue">
-        <mat-form-field>
-          <mat-label>{{ ingredient.key }}</mat-label>
-          <mat-select [(value)]="selectedIngredients[ingredient.key]">
-            <mat-select-trigger>
-              <img *ngIf="selectedIngredients[ingredient.key]?.thumbnail" [src]="selectedIngredients[ingredient.key]?.thumbnail" class="ingredient-thumbnail" />
-              <span>{{ selectedIngredients[ingredient.key]?.name }}</span>
-            </mat-select-trigger>
-            <mat-option [value]="null"> -- </mat-option>
-            <mat-option
-              *ngFor="let value of ingredient.value"
-              [value]="value"
-            >
-              <img *ngIf="value.thumbnail" [src]="value.thumbnail" class="ingredient-thumbnail" />
-              <span>{{ value.name }}</span>
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    </mat-card>
+  </ng-container>
+
+  <!-- Fallback if no menus (backward compatibility) -->
+  <ng-container *ngIf="(!menus || menus.length === 0)">
+    <mat-card class="dropdown-container" *ngIf="(dropdownsData | keyvalue).length > 0">
+      <mat-card-header>
+        <mat-card-title>Customise your variants</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let dropdown of dropdownsData | keyvalue">
+          <mat-form-field>
+            <mat-label>{{ dropdown.key }}</mat-label>
+            <mat-select [(value)]="selectedValues[dropdown.key]">
+              <mat-option [value]="null"> -- </mat-option>
+              <mat-option *ngFor="let value of dropdown.value" [value]="value">
+                {{ value }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="dropdown-container" *ngIf="(ingredientsData | keyvalue).length > 0">
+      <mat-card-header>
+        <mat-card-title>Ingredients</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let ingredient of ingredientsData | keyvalue">
+          <mat-form-field>
+            <mat-label>{{ ingredient.key }}</mat-label>
+            <mat-select [(value)]="selectedIngredients[ingredient.key]">
+              <mat-select-trigger>
+                <img *ngIf="selectedIngredients[ingredient.key]?.thumbnail" [src]="selectedIngredients[ingredient.key]?.thumbnail" class="ingredient-thumbnail" />
+                <span>{{ selectedIngredients[ingredient.key]?.name }}</span>
+              </mat-select-trigger>
+              <mat-option [value]="null"> -- </mat-option>
+              <mat-option
+                *ngFor="let value of ingredient.value"
+                [value]="value"
+              >
+                <img *ngIf="value.thumbnail" [src]="value.thumbnail" class="ingredient-thumbnail" />
+                <span>{{ value.name }}</span>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
   <div class="button-container">
     <button
       mat-raised-button

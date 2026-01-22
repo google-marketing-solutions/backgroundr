@@ -41,6 +41,11 @@ export interface IngredientsData {
   [key: string]: { name: string; thumbnail: string; fileId: string }[];
 }
 
+export interface MenuData {
+  title: string;
+  items: string[];
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -88,6 +93,7 @@ export class AppComponent implements OnInit {
   ];
   selectedAspectRatio: string | null = this.aspectRatios[0];
   ingredientsData: IngredientsData = {};
+  menus: MenuData[] = [];
   selectedIngredients: {
     [key: string]: { name: string; thumbnail: string; fileId: string } | null;
   } = {};
@@ -110,10 +116,12 @@ export class AppComponent implements OnInit {
         (dropdowns: {
           variants: DropdownData;
           ingredients: IngredientsData;
+          menus: MenuData[];
         }) => {
           this.zone.run(() => {
             this.dropdownsData = dropdowns.variants;
             this.ingredientsData = dropdowns.ingredients;
+            this.menus = dropdowns.menus;
 
             // Prune selectedValues that are no longer valid
             for (const key in this.selectedValues) {
