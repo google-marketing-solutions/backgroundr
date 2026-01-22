@@ -114,9 +114,21 @@ export class AppComponent implements OnInit {
           this.zone.run(() => {
             this.dropdownsData = dropdowns.variants;
             this.ingredientsData = dropdowns.ingredients;
-            for (const key in this.ingredientsData) {
-              this.selectedIngredients[key] = null;
+
+            // Prune selectedValues that are no longer valid
+            for (const key in this.selectedValues) {
+              if (!(key in this.dropdownsData)) {
+                delete this.selectedValues[key];
+              }
             }
+
+            // Prune selectedIngredients that are no longer valid
+            for (const key in this.selectedIngredients) {
+              if (!(key in this.ingredientsData)) {
+                delete this.selectedIngredients[key];
+              }
+            }
+
             this.isLoading = false;
           });
         }
@@ -147,8 +159,8 @@ export class AppComponent implements OnInit {
       .generateImages(
         this.numberOfImages,
         this.selectedValues,
-        this.autoScoreImages ? this.scoringThreshold : undefined,
-        this.maxRegenerations,
+        this.autoScoreImages ? Number(this.scoringThreshold) : undefined,
+        Number(this.maxRegenerations),
         this.selectedAspectRatio,
         selectedIngredientIds
       );
