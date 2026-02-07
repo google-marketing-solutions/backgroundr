@@ -45,6 +45,6 @@
     "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.2.1"
+    "@angular-devkit/build-angular": "^21.1.3"
   }
 }
