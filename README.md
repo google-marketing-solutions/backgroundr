@@ -14,15 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# BackgroundR
+# BackgroundR on 🍌s
+
+[![GitHub last commit](https://img.shields.io/github/last-commit/google-marketing-solutions/backgroundr)](https://github.com/google-marketing-solutions/backgroundr/commits)
+![GitHub Release](https://img.shields.io/github/v/release/google-marketing-solutions/backgroundr)
+[![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts)
+[![GitHub License](https://img.shields.io/github/license/google-marketing-solutions/backgroundr)](https://github.com/google-marketing-solutions/backgroundr/blob/main/LICENSE)
+[![Contributors](https://img.shields.io/github/contributors/google-marketing-solutions/backgroundr)](https://github.com/google-marketing-solutions/backgroundr/graphs/contributors)
 
 ## Overview
 
-BackgroundR automatically creates new backgrounds for your images based on a text-prompt. AI-based in-painting using Google's latest Imagen models ensures natural-looking background replacement. The tool is capable of exchanging backgrounds in bulk across many assets.
+**BackgroundR 2.0** leverages Google's Nano Banano model for comprehensive AI image editing. Far beyond simple background replacement, it instantly performs any visual edit needed to align your image assets with your corporate brand guidelines.
 
 ## Updates
 
-- **March 2026.** Support for Nano Banano.
+- **March 2026.** BackgroundR **2.0** with Nano Banano.
 - **December 2024.** Support for Imagen 3.
 - **August 2024** Initial release.
 
@@ -54,8 +60,8 @@ We aim to keep BackgroundR simple yet scalable. As a result, we have built it as
 The "Config" sheet allows you to customize the behavior of BackgroundR. Below is a description of each option:
 
 - **Cloud Project Id**: Your Google Cloud Project ID where the Vertex AI API is enabled.
-- **Image Generation Model**: The model ID used for image generation (e.g., `gemini-2.5-flash-image-preview` - Nano Banana).
-- **Scoring Model**: The model ID used for scoring images (e.g., `gemini-2.5-flash`).
+- **Image Generation Model**: The model ID used for image generation (e.g., `gemini-2.5-flash-image` or newer versions).
+- **Scoring Model**: The model ID used for scoring images (e.g., `gemini-2.5-flash` or newer versions).
 - **Drive Folder Id**: The ID of the Google Drive folder containing your source images. Please note this is not the URL of the folder, but the ID of the folder. You can find it in the URL of the folder, for example: https://drive.google.com/corp/drive/folders/1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF?resourcekey=0-wsFV1FiGbn_BRFcYY4Zs3A, the ID is `1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF`.
 - **GCP Location**: The Google Cloud region to use for API calls (e.g., `us-central1`, `europe-west3`).
 - **Dropdowns sheet**: The name of the sheet containing your background variant definitions (text prompts).
