@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Config } from './config';
+import {Config} from './config';
 import {
   ensureFolderExists,
   getFileById,
@@ -21,9 +21,9 @@ import {
   listFiles,
   writeToDrive,
 } from './drive-api';
-import { PromptPart, queryGemini } from './gemini';
-import { getImageResolution } from './image-utils';
-import { OnePrompt } from './one-prompt';
+import {PromptPart, queryGemini} from './gemini';
+import {getImageResolution} from './image-utils';
+import {OnePrompt} from './one-prompt';
 
 const HEADER_ROWS = 1;
 const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
@@ -264,8 +264,7 @@ const getImageAssets = (folderId: string) => {
   IMAGE_SHEET.getDataRange().offset(HEADER_ROWS, 0).clearContent();
 
   listFiles(folderId)
-    .filter((file: GoogleAppsScript.Drive.File) => file.getSize() < 10000000)
-    .slice(0, 10) // Sample 10 images under 10 Mb.
+    .filter((file: GoogleAppsScript.Drive.File) => file.getSize() < 30000000)
     .forEach((file: GoogleAppsScript.Drive.File) => {
       const fileBlob = file.getBlob();
       const bytes = fileBlob.getBytes();
