@@ -64,6 +64,16 @@ function onOpen() {
 }
 
 function clearGeneratedImages() {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    'Confirm',
+    'Are you sure you want to clear generated images?',
+    ui.ButtonSet.YES_NO
+  );
+  if (response !== ui.Button.YES) {
+    return;
+  }
+
   if (!IMAGE_SHEET) {
     throw `Sheet 'Images' not found`;
   }
@@ -72,6 +82,15 @@ function clearGeneratedImages() {
 }
 
 function getImagesFromDrive() {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    'Confirm',
+    'This will clear the current images and load new ones from Drive. Continue?',
+    ui.ButtonSet.YES_NO
+  );
+  if (response !== ui.Button.YES) {
+    return;
+  }
   getImageAssets(CONFIG['Drive Folder Id']);
 }
 
@@ -86,9 +105,20 @@ function loadDropDowns() {
   const config = Config.readConfig();
   const dropdownsData = OnePrompt.getDropdowns(config['Dropdowns sheet']);
   const ingredientsData = loadIngredients();
-  const elementsMenu = OnePrompt.getElementsMenu(
-    config['Elements Menu sheet'] || 'Elements Menu'
-  );
+  let elementsMenu;
+  if (config['Elements Menu sheet']) {
+    elementsMenu = OnePrompt.getElementsMenu(config['Elements Menu sheet']);
+  } else {
+    elementsMenu = [];
+    const dropdownKeys = Object.keys(dropdownsData);
+    if (dropdownKeys.length > 0) {
+      elementsMenu.push({ title: 'Dropdowns', items: dropdownKeys });
+    }
+    const ingredientKeys = Object.keys(ingredientsData);
+    if (ingredientKeys.length > 0) {
+      elementsMenu.push({ title: 'Ingredients', items: ingredientKeys });
+    }
+  }
   return {
     variants: dropdownsData,
     ingredients: ingredientsData,
@@ -372,7 +402,7 @@ const addToScoringSheet = (
 const processImageAssets = (
   backgroundDefinitions: BackgroundDefinition[],
   projectId: string,
-  region: string = '',
+  region = '',
   modelId: string,
   scoringThreshold?: number,
   maxRegenerations?: number,
