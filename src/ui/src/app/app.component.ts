@@ -80,6 +80,7 @@ export class AppComponent implements OnInit {
   scoringThreshold = 5;
   maxRegenerations = 1;
   aspectRatios: string[] = [
+    '',
     '1:1',
     '3:2',
     '2:3',
