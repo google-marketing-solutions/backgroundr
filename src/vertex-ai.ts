@@ -31,14 +31,19 @@ const createRequestOptions = (payload: unknown) =>
 const fetchJson = <T>(
   url: string,
   params: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions
-) => JSON.parse(UrlFetchApp.fetch(url, params).getContentText()) as T;
+) => {
+  const content = UrlFetchApp.fetch(url, params).getContentText();
+  console.log(`Response Content: ${content}`);
+  return JSON.parse(content) as T;
+};
 
 export const getPredictionEndpoint = (
   projectId: string,
   region: string,
   modelId: string
 ): string => {
-  return `https://${region}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}:predict`;
+  const action = modelId === 'gemini-2.5-flash-image' ? 'generateContent' : 'predict';
+  return `https://${region}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}:${action}`;
 };
 
 export const getPredictionBody = (
@@ -47,22 +52,16 @@ export const getPredictionBody = (
   modelId: string,
   backgroundRemoval: boolean
 ): GoogleAppsScript.URL_Fetch.URLFetchRequestOptions => {
-  if (modelId.startsWith('imagegeneration@')) {
+  if (modelId === 'gemini-2.5-flash-image') {
+    const enhancedPrompt = `You are a precise product image editor. Your task is to modify the background of the provided image to match this description: "${prompt}". CRITICAL INSTRUCTION: You MUST NOT modify, remove, or alter the main product/subject shown in the image in any way. The product itself must remain 100% identical to the original in terms of shape, color, orientation, and scale. Do NOT flip the product horizontally or vertically. Do NOT resize or scale down the product. Only modify the background around the product. Do not add any new text, logos, or unrelated elements. Failure to preserve the product perfectly is unacceptable.`;
     return createRequestOptions({
-      instances: [
-        {
-          prompt,
-          image: {
-            bytesBase64Encoded: image,
-          },
-        },
-      ],
-      parameters: {
-        sampleCount: 1,
-        editConfig: {
-          editMode: 'product-image',
-        },
-      },
+      "contents": [{
+        "role": "user",
+        "parts": [
+          { "text": enhancedPrompt },
+          { "inline_data": { "mime_type": "image/png", "data": image } }
+        ]
+      }]
     });
   } else if (modelId.startsWith('imagen-3.0')) {
     if (backgroundRemoval) {
@@ -138,10 +137,27 @@ export const predict = (
   // respect rate limitations
   Utilities.sleep(1000);
   console.log(`Prompt: ${prompt}`);
-  const res = fetchJson<PredictionResponse>(
+  const res = fetchJson<any>(
     predictionEndpoint,
     getPredictionBody(prompt, image, modelId, backgroundRemoval)
   );
   console.log(JSON.stringify(res, null, 2));
+  
+  if (modelId === 'gemini-2.5-flash-image') {
+    const parts = res.candidates?.[0]?.content?.parts;
+    if (parts) {
+      const imagePart = parts.find((p: any) => p.inlineData?.data || p.inline_data?.data);
+      if (imagePart) {
+        const data = imagePart.inlineData?.data || imagePart.inline_data?.data;
+        const mimeType = imagePart.inlineData?.mimeType || imagePart.inline_data?.mime_type || 'image/png';
+        return {
+          predictions: [{
+            bytesBase64Encoded: data,
+            mimeType: mimeType
+          }]
+        };
+      }
+    }
+  }
   return res;
 };

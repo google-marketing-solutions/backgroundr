@@ -32,15 +32,22 @@ limitations under the License.
   </mat-form-field>
   <mat-form-field>
     <mat-label>Region</mat-label>
-    <input matInput type="text" [(ngModel)]="region" [disabled]="isLoading" />
+    <mat-select [(ngModel)]="region" [disabled]="isLoading">
+      <mat-option value="us-central1">Iowa (us-central1)</mat-option>
+      <mat-option value="us-east1">South Carolina (us-east1)</mat-option>
+      <mat-option value="us-east4">N. Virginia (us-east4)</mat-option>
+      <mat-option value="us-east5">Columbus (us-east5)</mat-option>
+      <mat-option value="us-south1">Dallas (us-south1)</mat-option>
+      <mat-option value="us-west1">Oregon (us-west1)</mat-option>
+      <mat-option value="us-west4">Las Vegas (us-west4)</mat-option>
+    </mat-select>
   </mat-form-field>
   <mat-form-field>
     <mat-label>Image Generation Model</mat-label>
     <mat-select [(ngModel)]="modelId" [disabled]="isLoading">
+      <mat-option value="gemini-2.5-flash-image">Nano Banana</mat-option>
       <mat-option value="imagen-3.0-capability-001">Imagen 3</mat-option>
-      <mat-option value="imagegeneration@006"
-        >imagegeneration&#64;006</mat-option
-      >
+
     </mat-select>
   </mat-form-field>
   <mat-checkbox [(ngModel)]="backgroundRemoval"
