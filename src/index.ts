@@ -172,13 +172,14 @@ const processImageAssets = (
           const result = predict(
             `${e.description}`,
             base64Data,
+            file.getMimeType(),
             imageGenerationEndpoint,
             modelId,
             backgroundRemoval
           );
           return SpreadsheetApp.newCellImage()
             .setSourceUrl(
-              `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`
+              `data:${result.predictions[0].mimeType};base64,${result.predictions[0].bytesBase64Encoded}`
             )
             .build();
         });

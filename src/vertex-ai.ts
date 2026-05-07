@@ -48,6 +48,7 @@ export const getPredictionEndpoint = (
 export const getPredictionBody = (
   prompt: string,
   image: string,
+  mimeType: string,
   modelId: string,
   backgroundRemoval: boolean
 ): GoogleAppsScript.URL_Fetch.URLFetchRequestOptions => {
@@ -58,7 +59,7 @@ export const getPredictionBody = (
         "role": "user",
         "parts": [
           { "text": enhancedPrompt },
-          { "inline_data": { "mime_type": "image/png", "data": image } }
+          { "inline_data": { "mime_type": mimeType, "data": image } }
         ]
       }]
     });
@@ -129,6 +130,7 @@ export const getPredictionBody = (
 export const predict = (
   prompt: string,
   image: string,
+  mimeType: string,
   predictionEndpoint: string,
   modelId: string,
   backgroundRemoval: boolean
@@ -138,7 +140,7 @@ export const predict = (
   console.log(`Prompt: ${prompt}`);
   const res = fetchJson<any>(
     predictionEndpoint,
-    getPredictionBody(prompt, image, modelId, backgroundRemoval)
+    getPredictionBody(prompt, image, mimeType, modelId, backgroundRemoval)
   );
   console.log(JSON.stringify(res, null, 2));
   

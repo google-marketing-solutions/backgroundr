@@ -251,7 +251,7 @@ export class AppComponent implements OnInit {
       reader.onerror = reject;
       reader.readAsDataURL(imageBlob);
     });
-    const requestBody = this.getImagenRequestBody(current.prompt, imageBase64);
+    const requestBody = this.getImagenRequestBody(current.prompt, imageBase64, imageBlob.type);
     return this.httpClient.post<any>(
       vertexEndpoint,
       requestBody,
@@ -263,7 +263,7 @@ export class AppComponent implements OnInit {
     );
   }
 
-  getImagenRequestBody(prompt: string, imageBase64: string) {
+  getImagenRequestBody(prompt: string, imageBase64: string, mimeType: string) {
     if (this.modelId === 'gemini-2.5-flash-image') {
       const enhancedPrompt = `You are a precise product image editor. Your task is to modify the background of the provided image to match this description: "${prompt}". CRITICAL INSTRUCTION: You MUST NOT modify, remove, or alter the main product/subject shown in the image in any way. The product itself must remain 100% identical to the original in terms of shape, color, orientation, and scale. Do NOT flip the product horizontally or vertically. Do NOT resize or scale down the product. Only modify the background around the product. Do not add any new text, logos, or unrelated elements. Failure to preserve the product perfectly is unacceptable.`;
       return JSON.stringify({
@@ -271,7 +271,7 @@ export class AppComponent implements OnInit {
           "role": "user",
           "parts": [
             { "text": enhancedPrompt },
-            { "inline_data": { "mime_type": "image/png", "data": imageBase64 } }
+            { "inline_data": { "mime_type": mimeType, "data": imageBase64 } }
           ]
         }]
       });
