@@ -27,12 +27,13 @@ limitations under the License.
       matInput
       type="text"
       [(ngModel)]="projectId"
+      (ngModelChange)="saveSubject.next()"
       [disabled]="isLoading"
     />
   </mat-form-field>
   <mat-form-field>
     <mat-label>Region</mat-label>
-    <mat-select [(ngModel)]="region" [disabled]="isLoading">
+    <mat-select [(ngModel)]="region" (ngModelChange)="saveSubject.next()" [disabled]="isLoading">
       <mat-option value="us-central1">Iowa (us-central1)</mat-option>
       <mat-option value="us-east1">South Carolina (us-east1)</mat-option>
       <mat-option value="us-east4">N. Virginia (us-east4)</mat-option>
@@ -44,13 +45,16 @@ limitations under the License.
   </mat-form-field>
   <mat-form-field>
     <mat-label>Image Generation Model</mat-label>
-    <mat-select [(ngModel)]="modelId" [disabled]="isLoading">
+    <mat-select [(ngModel)]="modelId" (ngModelChange)="saveSubject.next()" [disabled]="isLoading">
       <mat-option value="gemini-2.5-flash-image">Nano Banana</mat-option>
       <mat-option value="imagen-3.0-capability-001">Imagen 3</mat-option>
-
     </mat-select>
   </mat-form-field>
-  <mat-checkbox [(ngModel)]="backgroundRemoval"
+  <div style="margin-bottom: 16px; font-size: 0.9em; color: #666;">
+    <span>Estimated: {{ backgrounds.length }} requests per image.</span><br/>
+    <a href="https://console.cloud.google.com/iam-admin/quotas?project={{projectId}}" target="_blank">Check your Quotas in Cloud Console</a>
+  </div>
+  <mat-checkbox *ngIf="modelId === 'imagen-3.0-capability-001'" [(ngModel)]="backgroundRemoval" (ngModelChange)="saveSubject.next()"
     >Remove existing background</mat-checkbox
   >
   <mat-form-field>
@@ -59,6 +63,7 @@ limitations under the License.
       matInput
       type="text"
       [(ngModel)]="driveFolderId"
+      (ngModelChange)="saveSubject.next()"
       [disabled]="isLoading"
     />
   </mat-form-field>
@@ -108,15 +113,7 @@ limitations under the License.
     </form>
   </mat-expansion-panel>
   <br />
-  <button
-    mat-raised-button
-    color="primary"
-    [disabled]="isLoading"
-    class="button"
-    (click)="saveConfig()"
-  >
-    Save config
-  </button>
+
   <mat-divider></mat-divider>
   <br />
   <h3 style="text-align: center">Preview (in Sheet)</h3>

@@ -36,10 +36,12 @@ import { MatSelectModule } from '@angular/material/select';
 
 import {
   bufferCount,
+  debounceTime,
   firstValueFrom,
   forkJoin,
   from,
   interval,
+  Subject,
   zip,
 } from 'rxjs';
 import { AppsScriptHelper } from '../apps-script-helper';
@@ -99,6 +101,7 @@ const BATCH_TIME_BETWEEN_REQUESTS = 10000;
 })
 export class AppComponent implements OnInit {
   title = 'ui';
+  saveSubject = new Subject<void>();
   driveFolderId = '';
   projectId = '';
   region = '';
@@ -125,6 +128,14 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.saveSubject.pipe(debounceTime(1000)).subscribe(() => {
+      this.saveConfig();
+    });
+
+    this.form.valueChanges.subscribe(() => {
+      this.saveSubject.next();
+    });
+
     this.isLoading = true;
     AppsScriptHelper.run<Config>('getConfig').then(config => {
       this.isLoading = false;
