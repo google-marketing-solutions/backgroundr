@@ -33,7 +33,6 @@ const fetchJson = <T>(
   params: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions
 ) => {
   const content = UrlFetchApp.fetch(url, params).getContentText();
-  console.log(`Response Content: ${content}`);
   return JSON.parse(content) as T;
 };
 

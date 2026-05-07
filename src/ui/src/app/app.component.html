@@ -52,7 +52,7 @@ limitations under the License.
   </mat-form-field>
   <div style="margin-bottom: 16px; font-size: 0.9em; color: #666;">
     <span>Estimated: {{ backgrounds.length }} requests per image.</span><br/>
-    <a href="https://console.cloud.google.com/iam-admin/quotas?project={{projectId}}" target="_blank">Check your Quotas in Cloud Console</a>
+    <a [href]="getQuotaUrl()" target="_blank">Check your Quotas in Cloud Console</a>
   </div>
   <mat-checkbox *ngIf="modelId === 'imagen-3.0-capability-001'" [(ngModel)]="backgroundRemoval" (ngModelChange)="saveSubject.next()"
     >Remove existing background</mat-checkbox

@@ -160,6 +160,28 @@ export class AppComponent implements OnInit {
     AppsScriptHelper.run('setConfig', config);
   }
 
+  getQuotaUrl(): string {
+    const filters = [
+      {
+        k: "Service ID",
+        t: 10,
+        v: "\"aiplatform.googleapis.com\"",
+        i: "serviceName"
+      },
+      {
+        k: "Dimensions (e.g. location)",
+        t: 10,
+        v: `"region:${this.region}"`,
+        s: true,
+        i: "displayDimensions"
+      }
+    ];
+    const filterStr = JSON.stringify(filters);
+    const encodedFilter = encodeURIComponent(encodeURIComponent(filterStr));
+    const pageState = `("allQuotasTable":("f":"${encodedFilter}"))`;
+    return `https://console.cloud.google.com/iam-admin/quotas?project=${this.projectId}&service=aiplatform.googleapis.com&pageState=${pageState}`;
+  }
+
   addBackground(title: string = '', description: string = '') {
     this.backgrounds.push(
       this.formBuilder.group({
