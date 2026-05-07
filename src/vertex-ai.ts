@@ -42,7 +42,8 @@ export const getPredictionEndpoint = (
   modelId: string
 ): string => {
   const action = modelId === 'gemini-2.5-flash-image' ? 'generateContent' : 'predict';
-  return `https://${region}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}:${action}`;
+  const domain = region === 'global' ? 'aiplatform.googleapis.com' : `${region}-aiplatform.googleapis.com`;
+  return `https://${domain}/v1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}:${action}`;
 };
 
 export const getPredictionBody = (

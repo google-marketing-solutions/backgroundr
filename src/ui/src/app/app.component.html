@@ -34,13 +34,24 @@ limitations under the License.
   <mat-form-field>
     <mat-label>Region</mat-label>
     <mat-select [(ngModel)]="region" (ngModelChange)="saveSubject.next()" [disabled]="isLoading">
-      <mat-option value="us-central1">Iowa (us-central1)</mat-option>
-      <mat-option value="us-east1">South Carolina (us-east1)</mat-option>
-      <mat-option value="us-east4">N. Virginia (us-east4)</mat-option>
-      <mat-option value="us-east5">Columbus (us-east5)</mat-option>
-      <mat-option value="us-south1">Dallas (us-south1)</mat-option>
-      <mat-option value="us-west1">Oregon (us-west1)</mat-option>
-      <mat-option value="us-west4">Las Vegas (us-west4)</mat-option>
+      <mat-option value="global">Global (Recommended)</mat-option>
+      <mat-optgroup label="United States">
+        <mat-option value="us-central1">Iowa (us-central1)</mat-option>
+        <mat-option value="us-east1">South Carolina (us-east1)</mat-option>
+        <mat-option value="us-east4">N. Virginia (us-east4)</mat-option>
+        <mat-option value="us-east5">Columbus (us-east5)</mat-option>
+        <mat-option value="us-south1">Dallas (us-south1)</mat-option>
+        <mat-option value="us-west1">Oregon (us-west1)</mat-option>
+        <mat-option value="us-west4">Las Vegas (us-west4)</mat-option>
+      </mat-optgroup>
+      <mat-optgroup label="Europe">
+        <mat-option value="europe-central2">Warsaw (europe-central2)</mat-option>
+        <mat-option value="europe-north1">Finland (europe-north1)</mat-option>
+        <mat-option value="europe-southwest1">Madrid (europe-southwest1)</mat-option>
+        <mat-option value="europe-west1">Belgium (europe-west1)</mat-option>
+        <mat-option value="europe-west4">Netherlands (europe-west4)</mat-option>
+        <mat-option value="europe-west8">Milan (europe-west8)</mat-option>
+      </mat-optgroup>
     </mat-select>
   </mat-form-field>
   <mat-form-field>

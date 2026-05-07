@@ -161,21 +161,24 @@ export class AppComponent implements OnInit {
   }
 
   getQuotaUrl(): string {
-    const filters = [
+    const filters: any[] = [
       {
         k: "Service ID",
         t: 10,
         v: "\"aiplatform.googleapis.com\"",
         i: "serviceName"
-      },
-      {
+      }
+    ];
+
+    if (this.region !== 'global') {
+      filters.push({
         k: "Dimensions (e.g. location)",
         t: 10,
         v: `"region:${this.region}"`,
         s: true,
         i: "displayDimensions"
-      }
-    ];
+      });
+    }
     const filterStr = JSON.stringify(filters);
     const encodedFilter = encodeURIComponent(encodeURIComponent(filterStr));
     const pageState = `("allQuotasTable":("f":"${encodedFilter}"))`;
@@ -230,7 +233,8 @@ export class AppComponent implements OnInit {
 
   async createVertexAiCall(current: ImageQueue) {
     const action = this.modelId === 'gemini-2.5-flash-image' ? 'generateContent' : 'predict';
-    const vertexEndpoint = `https://${this.region}-aiplatform.googleapis.com/v1/projects/${this.projectId}/locations/${this.region}/publishers/google/models/${this.modelId}:${action}`;
+    const domain = this.region === 'global' ? 'aiplatform.googleapis.com' : `${this.region}-aiplatform.googleapis.com`;
+    const vertexEndpoint = `https://${domain}/v1/projects/${this.projectId}/locations/${this.region}/publishers/google/models/${this.modelId}:${action}`;
     const imageBlob = await firstValueFrom(
       this.httpClient.get(
         `https://www.googleapis.com/drive/v3/files/${current.fileId}?alt=media`,
