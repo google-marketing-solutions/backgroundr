@@ -41,8 +41,11 @@ export const getPredictionEndpoint = (
   region: string,
   modelId: string
 ): string => {
-  const action = modelId === 'gemini-2.5-flash-image' ? 'generateContent' : 'predict';
-  const domain = region === 'global' ? 'aiplatform.googleapis.com' : `${region}-aiplatform.googleapis.com`;
+  const action = modelId.startsWith('gemini-') ? 'generateContent' : 'predict';
+  const domain =
+    region === 'global'
+      ? 'aiplatform.googleapis.com'
+      : `${region}-aiplatform.googleapis.com`;
   return `https://${domain}/v1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}:${action}`;
 };
 
@@ -53,16 +56,18 @@ export const getPredictionBody = (
   modelId: string,
   backgroundRemoval: boolean
 ): GoogleAppsScript.URL_Fetch.URLFetchRequestOptions => {
-  if (modelId === 'gemini-2.5-flash-image') {
+  if (modelId.startsWith('gemini-')) {
     const enhancedPrompt = `You are a precise product image editor. Your task is to modify the background of the provided image to match this description: "${prompt}". CRITICAL INSTRUCTION: You MUST NOT modify, remove, or alter the main product/subject shown in the image in any way. The product itself must remain 100% identical to the original in terms of shape, color, orientation, and scale. Do NOT flip the product horizontally or vertically. Do NOT resize or scale down the product. Only modify the background around the product. Do not add any new text, logos, or unrelated elements. Failure to preserve the product perfectly is unacceptable.`;
     return createRequestOptions({
-      "contents": [{
-        "role": "user",
-        "parts": [
-          { "text": enhancedPrompt },
-          { "inline_data": { "mime_type": mimeType, "data": image } }
-        ]
-      }]
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: enhancedPrompt },
+            { inline_data: { mime_type: mimeType, data: image } },
+          ],
+        },
+      ],
     });
   } else if (modelId.startsWith('imagen-3.0')) {
     if (backgroundRemoval) {
@@ -139,24 +144,38 @@ export const predict = (
   // respect rate limitations
   Utilities.sleep(1000);
   console.log(`Prompt: ${prompt}`);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res = fetchJson<any>(
     predictionEndpoint,
     getPredictionBody(prompt, image, mimeType, modelId, backgroundRemoval)
   );
   console.log(JSON.stringify(res, null, 2));
-  
-  if (modelId === 'gemini-2.5-flash-image') {
+
+  if (res.error) {
+    throw new Error(
+      `Vertex AI Error (${res.error.code}): ${res.error.message}`
+    );
+  }
+
+  if (modelId.startsWith('gemini-')) {
     const parts = res.candidates?.[0]?.content?.parts;
     if (parts) {
-      const imagePart = parts.find((p: any) => p.inlineData?.data || p.inline_data?.data);
+      const imagePart = parts.find(
+        (p: any) => p.inlineData?.data || p.inline_data?.data // eslint-disable-line @typescript-eslint/no-explicit-any
+      );
       if (imagePart) {
         const data = imagePart.inlineData?.data || imagePart.inline_data?.data;
-        const mimeType = imagePart.inlineData?.mimeType || imagePart.inline_data?.mime_type || 'image/png';
+        const mimeType =
+          imagePart.inlineData?.mimeType ||
+          imagePart.inline_data?.mime_type ||
+          'image/png';
         return {
-          predictions: [{
-            bytesBase64Encoded: data,
-            mimeType: mimeType
-          }]
+          predictions: [
+            {
+              bytesBase64Encoded: data,
+              mimeType: mimeType,
+            },
+          ],
         };
       }
     }

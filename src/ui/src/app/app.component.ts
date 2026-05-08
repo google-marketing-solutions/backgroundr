@@ -232,7 +232,7 @@ export class AppComponent implements OnInit {
   }
 
   async createVertexAiCall(current: ImageQueue) {
-    const action = this.modelId === 'gemini-2.5-flash-image' ? 'generateContent' : 'predict';
+    const action = this.modelId.startsWith('gemini-') ? 'generateContent' : 'predict';
     const domain = this.region === 'global' ? 'aiplatform.googleapis.com' : `${this.region}-aiplatform.googleapis.com`;
     const vertexEndpoint = `https://${domain}/v1/projects/${this.projectId}/locations/${this.region}/publishers/google/models/${this.modelId}:${action}`;
     const imageBlob = await firstValueFrom(
@@ -268,7 +268,7 @@ export class AppComponent implements OnInit {
   }
 
   getImagenRequestBody(prompt: string, imageBase64: string, mimeType: string) {
-    if (this.modelId === 'gemini-2.5-flash-image') {
+    if (this.modelId.startsWith('gemini-')) {
       const enhancedPrompt = `You are a precise product image editor. Your task is to modify the background of the provided image to match this description: "${prompt}". CRITICAL INSTRUCTION: You MUST NOT modify, remove, or alter the main product/subject shown in the image in any way. The product itself must remain 100% identical to the original in terms of shape, color, orientation, and scale. Do NOT flip the product horizontally or vertically. Do NOT resize or scale down the product. Only modify the background around the product. Do not add any new text, logos, or unrelated elements. Failure to preserve the product perfectly is unacceptable.`;
       return JSON.stringify({
         "contents": [{
@@ -370,7 +370,7 @@ export class AppComponent implements OnInit {
             let bytesBase64Encoded = '';
             let mimeType = 'image/png';
 
-            if (this.modelId === 'gemini-2.5-flash-image') {
+            if (this.modelId.startsWith('gemini-')) {
               const parts = e.candidates?.[0]?.content?.parts;
               if (parts) {
                 const imagePart = parts.find((p: any) => p.inlineData?.data || p.inline_data?.data);
@@ -396,6 +396,12 @@ export class AppComponent implements OnInit {
           });
           completedBatches++;
           this.loadingProgress = (completedBatches / totalBatches) * 100;
+        },
+        error: err => {
+          this.isLoading = false;
+          this.loadingProgress = undefined;
+          console.error('Batch failed:', err);
+          alert(`Error: ${err.error?.error?.message || err.message || err}`);
         },
         complete: () => {
           if (completedBatches === totalBatches) {

@@ -58,6 +58,8 @@ limitations under the License.
     <mat-label>Image Generation Model</mat-label>
     <mat-select [(ngModel)]="modelId" (ngModelChange)="saveSubject.next()" [disabled]="isLoading">
       <mat-option value="gemini-2.5-flash-image">Nano Banana</mat-option>
+      <mat-option value="gemini-3-pro-image-preview">Nano Banana Pro</mat-option>
+      <mat-option value="gemini-3.1-flash-image-preview">Nano Banana 2</mat-option>
       <mat-option value="imagen-3.0-capability-001">Imagen 3</mat-option>
     </mat-select>
   </mat-form-field>
