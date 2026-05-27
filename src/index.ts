@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Config} from './config';
+import { Config } from './config';
 import {
   ensureFolderExists,
   getFileById,
@@ -21,9 +21,9 @@ import {
   listFiles,
   writeToDrive,
 } from './drive-api';
-import {PromptPart, queryGemini} from './gemini';
-import {getImageResolution} from './image-utils';
-import {OnePrompt} from './one-prompt';
+import { PromptPart, queryGemini } from './gemini';
+import { getImageResolution } from './image-utils';
+import { OnePrompt } from './one-prompt';
 
 const HEADER_ROWS = 1;
 const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
@@ -188,6 +188,12 @@ function loadIngredients() {
   return ingredientsAsObject;
 }
 
+function parseRateLimitDelay(value?: string): number {
+  if (!value) return 500;
+  const seconds = parseFloat(value.replace('s', ''));
+  return isNaN(seconds) ? 500 : Math.round(seconds * 1000);
+}
+
 // Trigered from sidebar angular
 function generateImages(
   numberOfImages = 1,
@@ -199,7 +205,8 @@ function generateImages(
   imageAspectRatio?: string,
   ingredientsAsObject?: {
     [key: string]: string | null;
-  }
+  },
+  rateLimitDelayRaw = '0.5s'
 ) {
   console.log('---ingredientsAsObject---', ingredientsAsObject);
   console.log('generateImages', {
@@ -209,9 +216,11 @@ function generateImages(
     maxRegenerations,
     imageAspectRatio,
     ingredientsAsObject,
+    rateLimitDelayRaw,
   });
   const prefix = CONFIG['Prompt Prefix'];
   const suffix = CONFIG['Prompt Suffix'];
+  const rateLimitDelay = parseRateLimitDelay(rateLimitDelayRaw);
 
   const prompt = partsAsObject
     ? OnePrompt.generatePrompt(
@@ -242,7 +251,8 @@ function generateImages(
     CONFIG['Image Generation Model'],
     scoringThreshold,
     maxRegenerations,
-    imageAspectRatio
+    imageAspectRatio,
+    rateLimitDelay
   );
 }
 
@@ -406,7 +416,8 @@ const processImageAssets = (
   modelId: string,
   scoringThreshold?: number,
   maxRegenerations?: number,
-  imageAspectRatio?: string
+  imageAspectRatio?: string,
+  rateLimitDelay = 500
 ) => {
   console.log({ CONFIG });
   console.log('processImageAssets', {
@@ -464,7 +475,8 @@ const processImageAssets = (
                 CONFIG['Image Generation Model'],
                 {},
                 imageAspectRatio,
-                CONFIG['GCP Location']
+                CONFIG['GCP Location'],
+                rateLimitDelay
               );
               const imageScore = scoreImage(resultImageBase64);
               console.log(`Image score: ${imageScore}`);
@@ -497,7 +509,8 @@ const processImageAssets = (
               CONFIG['Image Generation Model'],
               {},
               imageAspectRatio,
-              CONFIG['GCP Location']
+              CONFIG['GCP Location'],
+              rateLimitDelay
             );
           }
           return SpreadsheetApp.newCellImage()

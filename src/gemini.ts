@@ -82,7 +82,8 @@ export class VertexAiApi {
     private _apiEndpoint = 'aiplatform.googleapis.com',
     private _geminiModel = 'gemini-1.5-flash',
     private _imageGenerationModel = 'imagegeneration',
-    private _imageAspectRatio?: string
+    private _imageAspectRatio?: string,
+    private _rateLimitDelay = 500
   ) {}
   /**
    * Constructs the API endpoint URL for the specified Gemini model.
@@ -255,7 +256,7 @@ export class VertexAiApi {
     }
 
     options.payload = JSON.stringify(payload);
-    Utilities.sleep(500); // To avoid error "Resource exhausted"
+    Utilities.sleep(this._rateLimitDelay); // To avoid error "Resource exhausted"
     const result = UrlFetchApp.fetch(this.getGeminiEndPoint(), options);
     if (200 !== result.getResponseCode()) {
       console.error(
@@ -318,7 +319,8 @@ export function queryGemini(
   modelId: string,
   responseSchema = {},
   imageAspectRatio?: string,
-  region?: string
+  region?: string,
+  rateLimitDelay?: number
 ) {
   return new VertexAiApi(
     gcpProjectId,
@@ -326,6 +328,7 @@ export function queryGemini(
     'aiplatform.googleapis.com',
     modelId,
     undefined,
-    imageAspectRatio
+    imageAspectRatio,
+    rateLimitDelay
   ).callGeminiApi(promptParts, !modelId.includes('image'), responseSchema);
 }

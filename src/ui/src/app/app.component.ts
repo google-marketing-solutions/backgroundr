@@ -97,6 +97,8 @@ export class AppComponent implements OnInit {
   selectedIngredients: {
     [key: string]: { name: string; thumbnail: string; fileId: string } | null;
   } = {};
+  rateLimitDelays: string[] = ['0.5s', '1s', '2s', '3s', '5s'];
+  selectedRateLimitDelay = '0.5s';
 
   constructor(private zone: NgZone) {}
 
@@ -170,7 +172,8 @@ export class AppComponent implements OnInit {
         this.autoScoreImages ? Number(this.scoringThreshold) : undefined,
         Number(this.maxRegenerations),
         this.selectedAspectRatio,
-        selectedIngredientIds
+        selectedIngredientIds,
+        this.selectedRateLimitDelay
       );
   }
 
@@ -192,7 +195,8 @@ export class AppComponent implements OnInit {
         this.autoScoreImages ? Number(this.scoringThreshold) : undefined,
         Number(this.maxRegenerations),
         this.selectedAspectRatio,
-        selectedIngredientIds
+        selectedIngredientIds,
+        this.selectedRateLimitDelay
       );
   }
 }
