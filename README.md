@@ -138,7 +138,7 @@ If you are looking to modify or deploy BackgroundR yourself, follow these develo
 
 ### Setup Requirements
 - **Node.js** (>= 16.x)
-- **Google [`aside`](https://github.com/google/aside)** installed globally (`npm i -g @google/aside`)
+- **Google [`aside`](https://github.com/google/aside)** installed globally (`npx @google/aside init`)
 
 ### Installation
 Install the parent and UI module dependencies:
