@@ -38,16 +38,15 @@ We aim to keep BackgroundR simple yet scalable. As a result, we have built it as
 
 1. Make a copy of this [Google Sheet](https://docs.google.com/spreadsheets/d/1FPlQbvqovVNlUFsCLJ9c_aEZ9bMDiZxVi4VsDn7daWM/copy).
 2. Find the "BackgroundR on 🍌s" menu in the menu bar and select "🎨 Open configurator". You might need to authorize the sheet to run on your behalf.
-3. Create a Google drive folder to store your raw "base" product images.
-4. Copy your Google drive folder's ID into "Driver Folder ID". The ID is found in the link to your folder path and it should be something like: "1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF"
+3. Create a Google Drive folder to store your raw "base" product images.
+4. Copy your Google Drive folder's ID into "Drive Folder ID". The ID is found in the link to your folder path and it should be something like: "1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF"
    Example: https://drive.google.com/corp/drive/folders/1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF?resourcekey=0-wsFV1FiGbn_BRFcYY4Zs3A
-5. Now you can load your images from the drive folder by selecting "📥 Load images from Google Drive" from the "BackgroundR on 🍌s" menu. Your original product images will load in Column A.
-   Enter you Google Cloud Project ID as well as the cloud region where you want to generate the images e.g. "europe-west3" or "us-central1". Look [here](https://cloud.google.com/vertex-ai/docs/general/locations) for additional available regions.
-   > **Note:** BackgroundR only create new images if a certain cell is empty. Clear column E F G if there are already images and you want to replace them.
+5. Now you can load your images from the Drive folder by selecting "📥 Load images from Google Drive" from the "BackgroundR on 🍌s" menu. Your original product images will load in Column A.
+   Enter your Google Cloud Project ID as well as the cloud region where you want to generate the images e.g. "europe-west3" or "us-central1". Look [here](https://cloud.google.com/vertex-ai/docs/general/locations) for additional available regions.
+   > **Note:** BackgroundR only creates new images if a certain cell is empty. Clear columns E, F, and G if there are already images and you want to replace them.
    > **Note:** Nano Banano has a file size limit of ~30MB. Images larger than this will be skipped during loading.
 6. Define your image elements in the 'Dropdowns' sheet (elements to be added to the image as text prompts only) and ingredients in the 'Ingredients' sheet (exact images to be added to the final image). Ensure these sheet names are correctly configured in the 'Config' sheet.
-7. Click the "Apply Selections" or "Universal Generate" button in the BackgroundR sidebar.
-   and give some time for it to load!
+7. Click the "Apply Selections" or "Universal Generate" button in the BackgroundR sidebar, and allow some time for it to load!
 
 ## Menu Items
 
@@ -69,7 +68,7 @@ The "Config" sheet allows you to customize the behavior of BackgroundR. Below is
 - **Ingredients sheet**: The name of the sheet containing your ingredient definitions (image assets).
 - **Prompt Prefix**: Text that will be automatically prepended to every generated prompt.
 - **Prompt Suffix**: Text that will be automatically appended to every generated prompt.
-- **Image Scoring Prompt**: The prompt used by the scoring model to evaluate the quality of generating images.
+- **Image Scoring Prompt**: The prompt used by the scoring model to evaluate the quality of generated images.
 - **Scoring results sheet**: The name of the sheet where image scoring results will be saved.
 
 ## Scoring
