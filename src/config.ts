@@ -17,11 +17,15 @@ export class Config {
   /**
    * Reads configuration key-value pairs from a Google Sheet.
    *
-   * @param sheetName The name of the sheet containing the config (default: 'Config').
-   * @param configVariables Optional list of specific keys to retrieve. If omitted, all keys are retrieved.
-   * @param onlyWithNonEmptyValues If true, excludes keys that have empty/falsy values.
+   * @param sheetName The name of the sheet containing the config
+   *   (default: 'Config').
+   * @param configVariables Optional list of specific keys to retrieve. If
+   *   omitted, all keys are retrieved.
+   * @param onlyWithNonEmptyValues If true, excludes keys that have
+   *   empty/falsy values.
    * @returns An object mapping configuration keys to their values.
    */
+
   static readConfig(
     sheetName = 'Config',
     configVariables?: string[],
