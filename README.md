@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# BackgroundR on 🍌s
+# 🍌 BackgroundR 2.0
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/google-marketing-solutions/backgroundr)](https://github.com/google-marketing-solutions/backgroundr/commits)
 ![GitHub Release](https://img.shields.io/github/v/release/google-marketing-solutions/backgroundr)
@@ -22,70 +22,161 @@ limitations under the License.
 [![GitHub License](https://img.shields.io/github/license/google-marketing-solutions/backgroundr)](https://github.com/google-marketing-solutions/backgroundr/blob/main/LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/google-marketing-solutions/backgroundr)](https://github.com/google-marketing-solutions/backgroundr/graphs/contributors)
 
-## Overview
+## 📖 Overview
 
-**BackgroundR 2.0** leverages Google's Nano Banano model for comprehensive AI image editing. Far beyond simple background replacement, it instantly performs any visual edit needed to align your image assets with your corporate brand guidelines.
+**BackgroundR 2.0** leverages Google's **Nano Banano** model for comprehensive AI image editing. Far beyond simple background replacement, it instantly performs any visual edit needed to align your image assets with your corporate brand guidelines.
 
-## Updates
+Built as an elegant, web-native Google Sheets Add-on, BackgroundR lets you process images in bulk directly from Google Sheets, powered by Gemini Enterprise Agent Platform (formerly Vertex AI).
 
-- **March 2026.** BackgroundR **2.0** with Nano Banano.
-- **December 2024.** Support for Imagen 3.
-- **August 2024** Initial release.
+---
 
-## Getting Started
+## ✨ Key Features
 
-We aim to keep BackgroundR simple yet scalable. As a result, we have built it as an Apps Script extension running on top of Google Sheets. To get started, follow the instructions below:
+- 🍌 **State-of-the-art AI Models**: Native integration with **Nano Banano**.
+- ⚙️ **Configurable Prompts**: Prepend and append custom prompt prefixes/suffixes automatically to match your brand style.
+- 📂 **Bulk Google Drive Syncing**: Load and save images to and from designated Drive folders seamlessly.
+- 📐 **Advanced Multi-variant Generation**: Custom sheets to define ingredient images and text variants to overlay or outpaint.
+- 🎯 **Automated Quality Control**: Scoring mechanism powered by Gemini to ensure every generated asset meets your quality threshold.
 
-1. Make a copy of this [Google Sheet](https://docs.google.com/spreadsheets/d/1FPlQbvqovVNlUFsCLJ9c_aEZ9bMDiZxVi4VsDn7daWM/copy).
-2. Find the "BackgroundR on 🍌s" menu in the menu bar and select "🎨 Open configurator". You might need to authorize the sheet to run on your behalf.
-3. Create a Google Drive folder to store your raw "base" product images.
-4. Copy your Google Drive folder's ID into "Drive Folder ID". The ID is found in the link to your folder path and it should be something like: "1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF"
-   Example: https://drive.google.com/corp/drive/folders/1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF?resourcekey=0-wsFV1FiGbn_BRFcYY4Zs3A
-5. Now you can load your images from the Drive folder by selecting "📥 Load images from Google Drive" from the "BackgroundR on 🍌s" menu. Your original product images will load in Column A.
-   Enter your Google Cloud Project ID as well as the cloud region where you want to generate the images e.g. "europe-west3" or "us-central1". Look [here](https://cloud.google.com/vertex-ai/docs/general/locations) for additional available regions.
-   > **Note:** BackgroundR only creates new images if a certain cell is empty. Clear columns E, F, and G if there are already images and you want to replace them.
-   > **Note:** Nano Banano has a file size limit of ~30MB. Images larger than this will be skipped during loading.
-6. Define your image elements in the 'Dropdowns' sheet (elements to be added to the image as text prompts only) and ingredients in the 'Ingredients' sheet (exact images to be added to the final image). Ensure these sheet names are correctly configured in the 'Config' sheet.
-7. Click the "Apply Selections" or "Universal Generate" button in the BackgroundR sidebar, and allow some time for it to load!
+---
 
-## Menu Items
+## 🛠️ Architecture & Tech Stack
 
-- **🎨 Open configurator**: Opens the sidebar configuration tool.
-- **📥 Load images from Google Drive**: Loads images from the configured Drive folder into the sheet.
-- **💾 Save selected images to Drive**: Saves the currently selected images in the sheet back to Google Drive.
-- **🧹 Clear generated images**: Clears the generated images from the sheet.
+BackgroundR uses a modern, lightweight stack to deliver advanced GenAI features inside Google Workspace:
 
-## Configuration
+- **Frontend (Sidebar UI)**: Built with **Angular 19** as a single-page application, optimized for seamless interactions.
+- **Backend Engine**: Powered by **TypeScript** transpiled to **Google Apps Script**, managed with [`aside`](https://github.com/google/aside).
+- **Generative AI APIs**: Integrated directly with GCP's **Gemini Enterprise Agent Platform (formerly Vertex AI)** (Nano Banano).
 
-The "Config" sheet allows you to customize the behavior of BackgroundR. Below is a description of each option:
+---
 
-- **Cloud Project Id**: Your Google Cloud Project ID where the Vertex AI API is enabled.
-- **Image Generation Model**: The model ID used for image generation (e.g., `gemini-2.5-flash-image` or newer versions).
-- **Scoring Model**: The model ID used for scoring images (e.g., `gemini-2.5-flash` or newer versions).
-- **Drive Folder Id**: The ID of the Google Drive folder containing your source images. Please note this is not the URL of the folder, but the ID of the folder. You can find it in the URL of the folder, for example: https://drive.google.com/corp/drive/folders/1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF?resourcekey=0-wsFV1FiGbn_BRFcYY4Zs3A, the ID is `1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF`.
-- **GCP Location**: The Google Cloud region to use for API calls (e.g., `us-central1`, `europe-west3`).
-- **Dropdowns sheet**: The name of the sheet containing your background variant definitions (text prompts).
-- **Ingredients sheet**: The name of the sheet containing your ingredient definitions (image assets).
-- **Prompt Prefix**: Text that will be automatically prepended to every generated prompt.
-- **Prompt Suffix**: Text that will be automatically appended to every generated prompt.
-- **Image Scoring Prompt**: The prompt used by the scoring model to evaluate the quality of generated images.
-- **Scoring results sheet**: The name of the sheet where image scoring results will be saved.
+## 🚀 Getting Started
 
-## Scoring
+We aim to keep BackgroundR simple yet scalable. Follow these steps to set up and start generating assets:
 
-BackgroundR includes an automated quality control mechanism that scores generated images using a Gemini model.
+### 1. Clone the Google Sheet Template
+Make a copy of this [Google Sheet Template](https://docs.google.com/spreadsheets/d/1FPlQbvqovVNlUFsCLJ9c_aEZ9bMDiZxVi4VsDn7daWM/copy).
 
-1.  **Evaluation**: Each generated image is sent to the configured **Scoring Model** along with the **Image Scoring Prompt**.
-2.  **Scoring**: The model evaluates the image and returns a numerical **Score** and reasoning. The scoring results are logged in the **Scoring results sheet**.
-3.  **Threshold Check**: The system compares the returned score against your defined **Scoring threshold**.
-    -   If the score is **greater than or equal to** the threshold, the image is accepted.
-    -   If the score is **below** the threshold, the system will discard the image and automatically regenerate a new version.
-4.  **Regeneration**: This process repeats until a satisfactory image is generated or the **Max regeneration** limit is reached.
+### 2. Set Up Your Drive Directories
+1. Create a folder in Google Drive to store your raw "base" product images.
+2. Copy your folder's ID from its URL.
+   > **Example**: For URL `https://drive.google.com/drive/folders/1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF`, the folder ID is `1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF`.
 
-## Requirements
+### 3. Open the Configurator
+In the Google Sheet menu bar, go to **BackgroundR on 🍌s** > **🎨 Open configurator**.
+> [!NOTE]
+> You might need to authorize the script to run in your account on the first launch.
 
-BackgroundR uses Google Cloud Platform's Vertex AI models. In order to use BackgroundR, you need access to a Google Cloud Project with the [Vertex AI API](https://cloud.google.com/vertex-ai/docs/generative-ai/start/quickstarts/api-quickstart) enabled.
+### 4. Configure your GCP Project & Drive Folder
+Under the **Config** sheet or inside the configurator sidebar, set:
+- **Cloud Project ID**: Your GCP Project where the Gemini Enterprise Agent Platform (formerly Vertex AI) API is enabled.
+- **GCP Location**: Region of your choice (e.g. `us-central1` or `europe-west3`).
+- **Drive Folder ID**: Paste the Google Drive folder ID copied in Step 2.
 
-## Disclaimer
+> [!IMPORTANT]
+> Ensure the [Gemini Enterprise Agent Platform (formerly Vertex AI) API](https://cloud.google.com/vertex-ai/docs/generative-ai/start/quickstarts/api-quickstart) is enabled on your GCP Project.
+
+### 5. Run and Generate
+1. Select **BackgroundR on 🍌s** > **📥 Load images from Google Drive** to populate Column A with your source images.
+2. Set your variants in the `Dropdowns` and `Ingredients` sheets.
+3. Click **Apply Selections** or **Universal Generate** in the sidebar and watch the AI generate your brand-aligned images!
+
+> [!NOTE]
+> BackgroundR only creates new images for empty cells. To replace existing images, clear columns **E**, **F**, and **G** first.
+>
+> Nano Banano enforces an image size limit of ~30MB; larger files will be skipped.
+
+---
+
+## ⚙️ Configuration Options
+
+The `Config` sheet governs BackgroundR behavior. Here is a description of the configurations:
+
+| Configuration Option | Description | Example / Default Value |
+| :--- | :--- | :--- |
+| **Cloud Project Id** | Google Cloud Project ID with Gemini Enterprise Agent Platform (formerly Vertex AI) enabled | `my-brand-gcp-project` |
+| **Image Generation Model** | Model ID used for image generation | `gemini-2.5-flash-image` |
+| **Scoring Model** | Model ID used for scoring generated images | `gemini-2.5-flash` |
+| **Drive Folder Id** | Google Drive Folder ID containing your source images | `1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF` |
+| **GCP Location** | Cloud region for Gemini Enterprise Agent Platform (formerly Vertex AI) API calls | `us-central1` or `europe-west3` |
+| **Dropdowns sheet** | The sheet defining your variant prompt definitions | `Dropdowns` |
+| **Ingredients sheet** | The sheet defining ingredient images assets | `Ingredients` |
+| **Prompt Prefix** | Text automatically prepended to all generated prompts | `A professional studio photo of...` |
+| **Prompt Suffix** | Text automatically appended to all generated prompts | `..., high quality, brand aligned.` |
+| **Image Scoring Prompt** | System instructions used to evaluate the quality of images | `Verify if the image looks realistic...` |
+| **Scoring results sheet**| Sheet where image scoring results are saved | `Scoring results` |
+
+---
+
+## 🎯 Scoring & Automated Regeneration
+
+To maintain production-grade standards, BackgroundR features an automated quality control loop:
+
+```mermaid
+graph TD
+    A[Generate Image] --> B[Send Image to Scoring Model]
+    B --> C{Score >= Scoring Threshold?}
+    C -- Yes --> D[Accept Image & Write to Sheet]
+    C -- No --> E[Discard Image]
+    E --> F{Regen Limit Reached?}
+    F -- No --> A
+    F -- Yes --> G[Stop & Log Failure]
+```
+
+1. **Evaluation**: Each generated image is evaluated by the **Scoring Model** utilizing the **Image Scoring Prompt**.
+2. **Scoring**: The model writes a numerical **Score** and feedback explanation to the **Scoring results sheet**.
+3. **Threshold Check**:
+   - If the score is **greater than or equal to** the threshold, the image is accepted.
+   - If the score is **below** the threshold, it is discarded and automatically queued for regeneration.
+4. **Loop Control**: Regeneration repeats until a qualified asset is generated or the **Max regeneration** limit is hit.
+
+---
+
+## 🧑‍💻 Developer Guide
+
+If you are looking to modify or deploy BackgroundR yourself, follow these developer guidelines.
+
+### Setup Requirements
+- **Node.js** (>= 16.x)
+- **Google [`aside`](https://github.com/google/aside)** installed globally (`npm i -g @google/aside`)
+
+### Installation
+Install the parent and UI module dependencies:
+```bash
+npm install
+```
+*(This will trigger a post-install script to set up the Angular workspace inside `src/ui` automatically).*
+
+### Local UI Development
+To develop the Sidebar interface locally:
+```bash
+npm run serve-ui
+```
+This spins up the Angular development server at `http://localhost:4200`.
+
+### Deployment
+To build the TypeScript codebase, compile and inject the Angular app into Google Apps Script format, and push via [`aside`](https://github.com/google/aside):
+
+1. **Login to clasp**:
+   ```bash
+   clasp login
+   ```
+2. **Initialize clasp files**:
+   Set up your `.clasp-dev.json` or `.clasp-prod.json` with your Google Apps Script project ID.
+3. **Deploy**:
+   ```bash
+   # Deploy to Dev environment
+   npm run deploy
+
+   # Deploy to Production target
+   npm run deploy:prod
+   ```
+
+---
+
+## 📜 License & Disclaimer
+
+Licensed under the Apache-2.0 License. See the [LICENSE](LICENSE) file for details.
 
 **This is not an officially supported Google product.**
+
