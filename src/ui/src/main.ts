@@ -1,4 +1,4 @@
-import { provideZoneChangeDetection } from '@angular/core';
+import {provideZoneChangeDetection} from '@angular/core';
 /**
  * Copyright 2024 Google LLC
  *
@@ -14,11 +14,16 @@ import { provideZoneChangeDetection } from '@angular/core';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
-import { appConfig } from './app/app.config';
+import {bootstrapApplication} from '@angular/platform-browser';
+import {AppComponent} from './app/app.component';
+import {appConfig} from './app/app.config';
+
+// For local development we want to mock google.script.run API
+
+import './appsscript-mock';
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [provideZoneChangeDetection(), ...appConfig.providers],
 }).catch(err => console.error(err));
+

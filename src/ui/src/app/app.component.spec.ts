@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CommonModule } from '@angular/common';
-import { TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import {CommonModule} from '@angular/common';
+import {TestBed} from '@angular/core/testing';
+import {AppComponent} from './app.component';
 
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('AppComponent', () => {
   beforeEach(() => {
@@ -50,7 +50,7 @@ describe('AppComponent', () => {
   it('should remove stale options when loading new dropdowns', () => {
     // Setup initial state with some selections
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
+    const app: any = fixture.componentInstance;
     app.selectedValues = { OldDropdown: 'OldValue' };
     app.selectedIngredients = {
       OldIngredient: { name: 'Old', thumbnail: '', fileId: '1' },
@@ -94,7 +94,7 @@ describe('AppComponent', () => {
 
   it('should ensure maxRegenerations and scoringThreshold are numbers when calling generateSelected', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
+    const app: any = fixture.componentInstance;
 
     // Simulate string inputs (e.g. from template binding before type coercion)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

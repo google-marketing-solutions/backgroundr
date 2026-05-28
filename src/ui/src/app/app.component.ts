@@ -28,24 +28,44 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
+/** Global reference to the Google Apps Script `google.script.run` API. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const google: any;
 
+/**
+ * Represents the dictionary mapping dropdown names to their string option
+ * arrays.
+ */
 export interface DropdownData {
   [key: string]: string[];
 }
 
-export interface IngredientsData {
-  [key: string]: { name: string; thumbnail: string; fileId: string }[];
+/** Represents the details of product/ingredient assets. */
+export interface IngredientItem {
+  name: string;
+  thumbnail: string;
+  fileId: string;
 }
 
+/**
+ * Represents the dictionary mapping category names to list of ingredients.
+ */
+export interface IngredientsData {
+  [key: string]: IngredientItem[];
+}
+
+/** Represents structural data for category card containers in the UI. */
 export interface MenuData {
   title: string;
   items: string[];
 }
 
+/**
+ * Main root component for the BackgroundR Angular Web Application.
+ * Exposes settings and trigger actions to generate and score background
+ * images using Gemini.
+ */
 @Component({
     selector: 'app-root',
     imports: [
@@ -62,7 +82,6 @@ export interface MenuData {
         MatIconModule,
         MatSelectModule,
         MatCheckboxModule,
-        BrowserAnimationsModule,
         MatTooltipModule,
         MatSlideToggleModule,
     ],
@@ -70,15 +89,41 @@ export interface MenuData {
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  isLoading = false;
-  loadingProgress: number | undefined;
-  dropdownsData: DropdownData = { 'Loading...': [] };
-  numberOfImages = 1;
-  selectedValues: { [key: string]: string | null } = {};
-  autoScoreImages = false;
-  scoringThreshold = 5;
-  maxRegenerations = 1;
-  aspectRatios: string[] = [
+  /** Indicates whether a backend operation is running. */
+  protected isLoading = false;
+
+  /**
+   * The current progress percentage (0-100) when running long batch
+   * generation tasks.
+   */
+  protected loadingProgress: number | undefined;
+
+  /** Available variant options grouped by category. */
+  protected dropdownsData: DropdownData = { 'Loading...': [] };
+
+  /** The target number of images to generate per batch. */
+  protected numberOfImages = 1;
+
+  /** Map storing selected values for custom dropdown categories. */
+  protected selectedValues: { [key: string]: string | null } = {};
+
+  /**
+   * Controls whether automatically generated images will be evaluated by
+   * Gemini.
+   */
+  protected autoScoreImages = false;
+
+  /**
+   * The minimum acceptable score for generated images under automatic
+   * quality control.
+   */
+  protected scoringThreshold = 5;
+
+  /** The maximum number of times a low-score image may be regenerated. */
+  protected maxRegenerations = 1;
+
+  /** The list of predefined aspect ratios available for image generation. */
+  protected aspectRatios: string[] = [
     '',
     '1:1',
     '3:2',
@@ -91,25 +136,52 @@ export class AppComponent implements OnInit {
     '16:9',
     '21:9',
   ];
-  selectedAspectRatio: string | null = this.aspectRatios[0];
-  ingredientsData: IngredientsData = {};
-  menus: MenuData[] = [];
-  selectedIngredients: {
-    [key: string]: { name: string; thumbnail: string; fileId: string } | null;
+
+  /** The currently selected aspect ratio. */
+  protected selectedAspectRatio: string | null = this.aspectRatios[0];
+
+  /** Available ingredient asset options grouped by category. */
+  protected ingredientsData: IngredientsData = {};
+
+  /** Categorized UI menus defined by sheet layouts. */
+  protected menus: MenuData[] = [];
+
+  /** Map storing the selected ingredient items by category. */
+  protected selectedIngredients: {
+    [key: string]: IngredientItem | null;
   } = {};
 
-  constructor(private zone: NgZone) {}
+  constructor(private readonly zone: NgZone) {}
 
+  /**
+   * Angular Lifecycle hook invoked after component initialization.
+   * Triggers initial retrieval of dropdown options from the backend
+   * spreadsheet.
+   */
   ngOnInit(): void {
     this.loadDropDowns();
   }
 
-  onDropdownChange(dropdownName: string, selectedValue: string) {
+  /**
+   * Handler invoked when a dropdown value changes.
+   *
+   * @param dropdownName The identifier of the modified dropdown category.
+   * @param selectedValue The newly selected string value.
+   * @returns A boolean representing update acknowledgement.
+   */
+  protected onDropdownChange(
+    dropdownName: string,
+    selectedValue: string
+  ): boolean {
     this.selectedValues[dropdownName] = selectedValue;
     return true;
   }
 
-  loadDropDowns() {
+  /**
+   * Fetches the full catalog of dropdowns, ingredients, and menus from
+   * Google Sheets, then automatically prunes stale selections.
+   */
+  protected loadDropDowns(): void {
     this.isLoading = true;
     google.script.run
       .withSuccessHandler(
@@ -144,19 +216,21 @@ export class AppComponent implements OnInit {
       .loadDropDowns();
   }
 
-  setLoadingToFinished() {
+  /**
+   * Helper callback to finalize loading status and hide progress bars.
+   */
+  protected setLoadingToFinished(): void {
     this.zone.run(() => {
       this.isLoading = false;
     });
   }
 
-  generateSelected() {
+  /**
+   * Requests the Google Apps Script backend to generate images utilizing the
+   * explicit user selections configured in the sidebar dropdowns.
+   */
+  protected generateSelected(): void {
     this.isLoading = true;
-    console.log('selectedIngredients', this.selectedIngredients);
-    console.log('generateAutomatically', {
-      numberOfImages: this.numberOfImages,
-      selectedValues: this.selectedValues,
-    });
     const selectedIngredientIds: { [key: string]: string | null } = {};
     for (const key in this.selectedIngredients) {
       const ingredient = this.selectedIngredients[key];
@@ -174,10 +248,11 @@ export class AppComponent implements OnInit {
       );
   }
 
-  generateAutomatically() {
-    console.log('generateAutomatically', {
-      numberOfImages: this.numberOfImages,
-    });
+  /**
+   * Requests the Google Apps Script backend to generate images automatically
+   * based on global config without using explicit custom selections.
+   */
+  protected generateAutomatically(): void {
     const selectedIngredientIds: { [key: string]: string | null } = {};
     for (const key in this.selectedIngredients) {
       const ingredient = this.selectedIngredients[key];
