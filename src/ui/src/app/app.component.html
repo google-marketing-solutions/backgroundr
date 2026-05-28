@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,104 +13,127 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+@if (isLoading) {
 <mat-progress-bar
   class="sticky"
   [mode]="loadingProgress === undefined ? 'indeterminate' : 'determinate'"
   [value]="loadingProgress"
-  *ngIf="isLoading"
 ></mat-progress-bar>
+}
 <div class="main-content">
   <h1 style="text-align: center">BackgroundR on 🍌s!</h1>
-  <ng-container *ngFor="let menu of menus">
-    <mat-card class="dropdown-container">
-      <mat-card-header>
-        <mat-card-title>{{ menu.title }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div *ngFor="let item of menu.items">
-          <ng-container *ngIf="dropdownsData[item]">
-            <mat-form-field>
-              <mat-label>{{ item }}</mat-label>
-              <mat-select [(value)]="selectedValues[item]">
-                <mat-option [value]="null"> -- </mat-option>
-                <mat-option *ngFor="let value of dropdownsData[item]" [value]="value">
-                  {{ value }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </ng-container>
-
-          <ng-container *ngIf="ingredientsData[item]">
-            <mat-form-field>
-              <mat-label>{{ item }}</mat-label>
-              <mat-select [(value)]="selectedIngredients[item]">
-                <mat-select-trigger>
-                  <img *ngIf="selectedIngredients[item]?.thumbnail" [src]="selectedIngredients[item]?.thumbnail" class="ingredient-thumbnail" />
-                  <span>{{ selectedIngredients[item]?.name }}</span>
-                </mat-select-trigger>
-                <mat-option [value]="null"> -- </mat-option>
-                <mat-option
-                  *ngFor="let value of ingredientsData[item]"
-                  [value]="value"
-                >
-                  <img *ngIf="value.thumbnail" [src]="value.thumbnail" class="ingredient-thumbnail" />
-                  <span>{{ value.name }}</span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </ng-container>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </ng-container>
+  @for (menu of menus; track menu) {
+  <mat-card class="dropdown-container">
+    <mat-card-header>
+      <mat-card-title>{{ menu.title }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @for (item of menu.items; track item) {
+      <div>
+        @if (dropdownsData[item]) {
+        <mat-form-field>
+          <mat-label>{{ item }}</mat-label>
+          <mat-select [(value)]="selectedValues[item]">
+            <mat-option [value]="null"> -- </mat-option>
+            @for (value of dropdownsData[item]; track value) {
+            <mat-option [value]="value">
+              {{ value }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        } @if (ingredientsData[item]) {
+        <mat-form-field>
+          <mat-label>{{ item }}</mat-label>
+          <mat-select [(value)]="selectedIngredients[item]">
+            <mat-select-trigger>
+              @if (selectedIngredients[item]?.thumbnail) {
+              <img
+                [src]="selectedIngredients[item]?.thumbnail"
+                class="ingredient-thumbnail"
+              />
+              }
+              <span>{{ selectedIngredients[item]?.name }}</span>
+            </mat-select-trigger>
+            <mat-option [value]="null"> -- </mat-option>
+            @for (value of ingredientsData[item]; track value) {
+            <mat-option [value]="value">
+              @if (value.thumbnail) {
+              <img [src]="value.thumbnail" class="ingredient-thumbnail" />
+              }
+              <span>{{ value.name }}</span>
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+  }
 
   <!-- Fallback if no menus (backward compatibility) -->
-  <ng-container *ngIf="(!menus || menus.length === 0)">
-    <mat-card class="dropdown-container" *ngIf="(dropdownsData | keyvalue).length > 0">
-      <mat-card-header>
-        <mat-card-title>Customise your variants</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div *ngFor="let dropdown of dropdownsData | keyvalue">
-          <mat-form-field>
-            <mat-label>{{ dropdown.key }}</mat-label>
-            <mat-select [(value)]="selectedValues[dropdown.key]">
-              <mat-option [value]="null"> -- </mat-option>
-              <mat-option *ngFor="let value of dropdown.value" [value]="value">
-                {{ value }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </mat-card-content>
-    </mat-card>
-    <mat-card class="dropdown-container" *ngIf="(ingredientsData | keyvalue).length > 0">
-      <mat-card-header>
-        <mat-card-title>Ingredients</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div *ngFor="let ingredient of ingredientsData | keyvalue">
-          <mat-form-field>
-            <mat-label>{{ ingredient.key }}</mat-label>
-            <mat-select [(value)]="selectedIngredients[ingredient.key]">
-              <mat-select-trigger>
-                <img *ngIf="selectedIngredients[ingredient.key]?.thumbnail" [src]="selectedIngredients[ingredient.key]?.thumbnail" class="ingredient-thumbnail" />
-                <span>{{ selectedIngredients[ingredient.key]?.name }}</span>
-              </mat-select-trigger>
-              <mat-option [value]="null"> -- </mat-option>
-              <mat-option
-                *ngFor="let value of ingredient.value"
-                [value]="value"
-              >
-                <img *ngIf="value.thumbnail" [src]="value.thumbnail" class="ingredient-thumbnail" />
-                <span>{{ value.name }}</span>
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </ng-container>
+  @if ((!menus || menus.length === 0)) { @if ((dropdownsData | keyvalue).length
+  > 0) {
+  <mat-card class="dropdown-container">
+    <mat-card-header>
+      <mat-card-title>Customise your variants</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @for (dropdown of dropdownsData | keyvalue; track dropdown) {
+      <div>
+        <mat-form-field>
+          <mat-label>{{ dropdown.key }}</mat-label>
+          <mat-select [(value)]="selectedValues[dropdown.key]">
+            <mat-option [value]="null"> -- </mat-option>
+            @for (value of dropdown.value; track value) {
+            <mat-option [value]="value">
+              {{ value }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+  } @if ((ingredientsData | keyvalue).length > 0) {
+  <mat-card class="dropdown-container">
+    <mat-card-header>
+      <mat-card-title>Ingredients</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @for (ingredient of ingredientsData | keyvalue; track ingredient) {
+      <div>
+        <mat-form-field>
+          <mat-label>{{ ingredient.key }}</mat-label>
+          <mat-select [(value)]="selectedIngredients[ingredient.key]">
+            <mat-select-trigger>
+              @if (selectedIngredients[ingredient.key]?.thumbnail) {
+              <img
+                [src]="selectedIngredients[ingredient.key]?.thumbnail"
+                class="ingredient-thumbnail"
+              />
+              }
+              <span>{{ selectedIngredients[ingredient.key]?.name }}</span>
+            </mat-select-trigger>
+            <mat-option [value]="null"> -- </mat-option>
+            @for (value of ingredient.value; track value) {
+            <mat-option [value]="value">
+              @if (value.thumbnail) {
+              <img [src]="value.thumbnail" class="ingredient-thumbnail" />
+              }
+              <span>{{ value.name }}</span>
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+  } }
   <div class="button-container">
     <button
       mat-raised-button
@@ -140,9 +163,11 @@ limitations under the License.
       <mat-form-field appearance="fill">
         <mat-label>Aspect Ratio</mat-label>
         <mat-select [(ngModel)]="selectedAspectRatio">
-          <mat-option *ngFor="let ratio of aspectRatios" [value]="ratio">
+          @for (ratio of aspectRatios; track ratio) {
+          <mat-option [value]="ratio">
             {{ ratio }}
           </mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
@@ -150,7 +175,8 @@ limitations under the License.
         AI quality control
       </mat-slide-toggle>
 
-      <div *ngIf="autoScoreImages">
+      @if (autoScoreImages) {
+      <div>
         <mat-form-field appearance="fill">
           <mat-label>Scoring threshold</mat-label>
           <input
@@ -162,7 +188,6 @@ limitations under the License.
             step="1"
           />
         </mat-form-field>
-
         <mat-form-field appearance="fill">
           <mat-label>Max regeneration</mat-label>
           <input
@@ -175,6 +200,7 @@ limitations under the License.
           />
         </mat-form-field>
       </div>
+      }
     </mat-card-content>
   </mat-card>
   <mat-card class="buttons">
