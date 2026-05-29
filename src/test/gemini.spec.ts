@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PromptPart, VertexAiApi, queryGemini} from '../gemini';
+import { PromptPart, VertexAiApi, queryGemini } from '../gemini';
 
 describe('VertexAiApi', () => {
   let api: VertexAiApi;
