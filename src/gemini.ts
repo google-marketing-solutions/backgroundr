@@ -130,13 +130,19 @@ export class VertexAiApi {
    * @param apiEndpoint The base API endpoint for Gemini.
    * @param geminiModel The Gemini model for text generation.
    * @param imageAspectRatio The aspect ratio for image generation.
+   * @param maxRetries Optional maximum number of retries on rate limit
+   *   (default 3).
+   * @param retryDelayMs Optional initial delay in milliseconds for backoff
+   *   (default 1000).
    */
   constructor(
     private projectId: string,
     private region: string,
     private apiEndpoint: string,
     private geminiModel: string,
-    private imageAspectRatio?: string
+    private imageAspectRatio?: string,
+    private maxRetries = 3,
+    private retryDelayMs = 1000
   ) {}
 
   /**
@@ -294,15 +300,32 @@ export class VertexAiApi {
     }
 
     options.payload = JSON.stringify(payload);
-    Utilities.sleep(500); // To avoid error "Resource exhausted"
-    const result = UrlFetchApp.fetch(this.getGeminiEndpoint(), options);
-    if (result.getResponseCode() !== 200) {
+    let retries = this.maxRetries;
+    let delay = this.retryDelayMs;
+    let result = UrlFetchApp.fetch(this.getGeminiEndpoint(), options);
+
+    while (result.getResponseCode() !== 200) {
+      const contentText = result.getContentText();
+      const isRateLimited =
+        result.getResponseCode() === 429 ||
+        contentText.includes('RESOURCE_EXHAUSTED');
+
+      if (isRateLimited && retries > 0) {
+        retries--;
+        // Sleep with exponential backoff + random jitter between 0 and 500ms
+        const jitter = Math.floor(Math.random() * 500);
+        Utilities.sleep(delay + jitter);
+        delay *= 2;
+        result = UrlFetchApp.fetch(this.getGeminiEndpoint(), options);
+        continue;
+      }
+
       console.error(
         'Call to Gemini API failed',
         result.getAllHeaders(),
-        result.getContentText()
+        contentText
       );
-      throw new GeminiApiCallError(result.getContentText());
+      throw new GeminiApiCallError(contentText);
     }
 
     let resultParsed: GeminiApiResponse;

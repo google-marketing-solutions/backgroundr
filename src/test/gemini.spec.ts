@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PromptPart, VertexAiApi, queryGemini } from '../gemini';
+import {PromptPart, VertexAiApi, queryGemini} from '../gemini';
 
 describe('VertexAiApi', () => {
   let api: VertexAiApi;
@@ -193,6 +193,121 @@ describe('VertexAiApi', () => {
       expect(() =>
         api.callGeminiApi([{ type: 'text', value: 'test' }])
       ).toThrow('Bad Request');
+    });
+
+    it('should retry on 429 and succeed subsequently', () => {
+      const mockResponse = {
+        candidates: [
+          {
+            content: {
+              parts: [{ text: 'Success after retry' }],
+            },
+          },
+        ],
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (global as any).UrlFetchApp = {
+        fetch: jest
+          .fn()
+          .mockReturnValueOnce({
+            getResponseCode: () => 429,
+            getContentText: () => 'RESOURCE_EXHAUSTED',
+            getAllHeaders: () => ({}),
+          })
+          .mockReturnValueOnce({
+            getResponseCode: () => 200,
+            getContentText: () => JSON.stringify(mockResponse),
+            getAllHeaders: () => ({}),
+          }),
+      };
+
+      const result = api.callGeminiApi([{ type: 'text', value: 'test' }], true);
+      expect(result).toBe('Success after retry');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledTimes(2);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((global as any).Utilities.sleep).toHaveBeenCalledTimes(1);
+    });
+
+    it('should retry 3 times and eventually fail', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (global as any).UrlFetchApp = {
+        fetch: jest.fn().mockReturnValue({
+          getResponseCode: () => 429,
+          getContentText: () => 'RESOURCE_EXHAUSTED',
+          getAllHeaders: () => ({}),
+        }),
+      };
+
+      expect(() =>
+        api.callGeminiApi([{ type: 'text', value: 'test' }])
+      ).toThrow('RESOURCE_EXHAUSTED');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledTimes(4);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((global as any).Utilities.sleep).toHaveBeenCalledTimes(3);
+    });
+
+    it('should respect user-specified custom maxRetries value', () => {
+      const customApi = new VertexAiApi(
+        'mock-project',
+        'us-central1',
+        'aiplatform.googleapis.com',
+        'mocked-model',
+        undefined,
+        1
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (global as any).UrlFetchApp = {
+        fetch: jest.fn().mockReturnValue({
+          getResponseCode: () => 429,
+          getContentText: () => 'RESOURCE_EXHAUSTED',
+          getAllHeaders: () => ({}),
+        }),
+      };
+
+      expect(() =>
+        customApi.callGeminiApi([{ type: 'text', value: 'test' }])
+      ).toThrow('RESOURCE_EXHAUSTED');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledTimes(2);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((global as any).Utilities.sleep).toHaveBeenCalledTimes(1);
+    });
+
+    it('should respect user-specified custom retryDelayMs value', () => {
+      const customApi = new VertexAiApi(
+        'mock-project',
+        'us-central1',
+        'aiplatform.googleapis.com',
+        'mocked-model',
+        undefined,
+        1,
+        10
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (global as any).UrlFetchApp = {
+        fetch: jest.fn().mockReturnValue({
+          getResponseCode: () => 429,
+          getContentText: () => 'RESOURCE_EXHAUSTED',
+          getAllHeaders: () => ({}),
+        }),
+      };
+
+      expect(() =>
+        customApi.callGeminiApi([{ type: 'text', value: 'test' }])
+      ).toThrow('RESOURCE_EXHAUSTED');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((global as any).Utilities.sleep).toHaveBeenCalledWith(
+        expect.any(Number)
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sleepCall = (global as any).Utilities.sleep.mock.calls[0][0];
+      expect(sleepCall).toBeGreaterThanOrEqual(10);
+      expect(sleepCall).toBeLessThanOrEqual(510);
     });
 
     it('should throw JsonParseError when response is not valid JSON', () => {
