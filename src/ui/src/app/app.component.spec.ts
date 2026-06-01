@@ -21,8 +21,7 @@ import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('AppComponent', () => {
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).google = {
+    (window as unknown as Record<string, unknown>)['google'] = {
       script: {
         run: {
           withSuccessHandler: () => ({
@@ -50,7 +49,18 @@ describe('AppComponent', () => {
   it('should remove stale options when loading new dropdowns', () => {
     // Setup initial state with some selections
     const fixture = TestBed.createComponent(AppComponent);
-    const app: any = fixture.componentInstance;
+    const app = fixture.componentInstance as unknown as {
+      selectedValues: { [key: string]: string | null };
+      selectedIngredients: {
+        [key: string]: {
+          name: string;
+          thumbnail: string;
+          fileId: string;
+        } | null;
+      };
+      dropdownsData: Record<string, string[]>;
+      loadDropDowns(): void;
+    };
     app.selectedValues = { OldDropdown: 'OldValue' };
     app.selectedIngredients = {
       OldIngredient: { name: 'Old', thumbnail: '', fileId: '1' },
@@ -60,8 +70,7 @@ describe('AppComponent', () => {
     const mockGoogle = {
       script: {
         run: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          withSuccessHandler: (callback: any) => ({
+          withSuccessHandler: (callback: (data: unknown) => void) => ({
             loadDropDowns: () => {
               // Simulate returning new data that does NOT have the old keys
               callback({
@@ -75,8 +84,7 @@ describe('AppComponent', () => {
         },
       },
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).google = mockGoogle;
+    (window as unknown as Record<string, unknown>)['google'] = mockGoogle;
 
     // Act
     app.loadDropDowns();
@@ -94,19 +102,21 @@ describe('AppComponent', () => {
 
   it('should ensure maxRegenerations and scoringThreshold are numbers when calling generateSelected', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app: any = fixture.componentInstance;
+    const app = fixture.componentInstance as unknown as {
+      maxRegenerations: unknown;
+      scoringThreshold: unknown;
+      autoScoreImages: boolean;
+      generateSelected(): void;
+    };
 
     // Simulate string inputs (e.g. from template binding before type coercion)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.maxRegenerations = '5' as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.scoringThreshold = '8' as any;
+    app.maxRegenerations = '5' as unknown;
+    app.scoringThreshold = '8' as unknown;
     app.autoScoreImages = true;
 
     // Spy on google.script.run.generateImages
     const generateImagesSpy = jasmine.createSpy('generateImages');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).google = {
+    (window as unknown as Record<string, unknown>)['google'] = {
       script: {
         run: {
           withSuccessHandler: () => ({

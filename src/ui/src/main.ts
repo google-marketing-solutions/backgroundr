@@ -19,11 +19,9 @@ import {AppComponent} from './app/app.component';
 import {appConfig} from './app/app.config';
 
 // For local development we want to mock google.script.run API
-
 import './appsscript-mock';
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [provideZoneChangeDetection(), ...appConfig.providers],
 }).catch(err => console.error(err));
-

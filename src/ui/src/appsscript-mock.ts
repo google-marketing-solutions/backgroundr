@@ -17,9 +17,13 @@ import {isDevMode} from '@angular/core';
 
 // Mock google.script.run API if running locally outside Google Apps Script
 // environment and in Angular development mode.
-if (isDevMode() && typeof (window as any).google === 'undefined') {
+if (
+  isDevMode() &&
+  typeof (window as unknown as Record<string, unknown>)['google'] ===
+    'undefined'
+) {
   const createMockRun = (successCb?: Function, failureCb?: Function) => {
-    const runner: any = {
+    const runner = {
       withSuccessHandler: (cb: Function) => createMockRun(cb, failureCb),
       withFailureHandler: (cb: Function) => createMockRun(successCb, cb),
       loadDropDowns: () => {
@@ -28,13 +32,13 @@ if (isDevMode() && typeof (window as any).google === 'undefined') {
           setTimeout(() => {
             successCb({
               variants: {
-                'Background': [
+                Background: [
                   'Warm Studio',
                   'Soft Glow',
                   'Neon Night',
                   'Sunny Kitchen',
                 ],
-                'Style': ['Modern', 'Rustic', 'Cyberpunk', 'Organic'],
+                Style: ['Modern', 'Rustic', 'Cyberpunk', 'Organic'],
               },
               ingredients: {
                 'Ingredient A': [
@@ -64,7 +68,7 @@ if (isDevMode() && typeof (window as any).google === 'undefined') {
           }, 800);
         }
       },
-      generateImages: (...args: any[]) => {
+      generateImages: (...args: unknown[]) => {
         console.log('Mock: generateImages() called with:', args);
         if (successCb) {
           setTimeout(() => {
@@ -76,7 +80,7 @@ if (isDevMode() && typeof (window as any).google === 'undefined') {
     return runner;
   };
 
-  (window as any).google = {
+  (window as unknown as Record<string, unknown>)['google'] = {
     script: {
       run: createMockRun(),
     },
