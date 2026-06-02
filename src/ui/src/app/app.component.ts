@@ -254,8 +254,7 @@ export class AppComponent implements OnInit {
    */
   protected generateAutomatically(): void {
     const selectedIngredientIds: { [key: string]: string | null } = {};
-    for (const key in this.selectedIngredients) {
-      const ingredient = this.selectedIngredients[key];
+    for (const [key, ingredient] of Object.entries(this.selectedIngredients)) {
       selectedIngredientIds[key] = ingredient ? ingredient.fileId : null;
     }
     this.isLoading = true;
