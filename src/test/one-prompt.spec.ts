@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { getFileById } from '../drive-api';
-import { OnePrompt } from '../one-prompt';
-import { DropdownsSheetReader } from '../dropdowns-sheet-reader';
+import {getFileById} from '../drive-api';
+import {OnePrompt} from '../one-prompt';
+import {DropdownsSheetReader} from '../dropdowns-sheet-reader';
 
 jest.mock('../dropdowns-sheet-reader');
 jest.mock('../drive-api');
@@ -74,8 +74,8 @@ describe('OnePrompt', () => {
         base64Encode: jest.fn().mockReturnValue('MockedBase64'),
       };
 
-      const partsAsObject = { Style: 'Vector' };
-      const ingredients = { Logo: 'file-id-123' };
+      const partsAsObject = {Style: 'Vector'};
+      const ingredients = {Logo: 'file-id-123'};
 
       const result = OnePrompt.generatePrompt(
         partsAsObject,

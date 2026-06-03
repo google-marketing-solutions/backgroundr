@@ -1,4 +1,3 @@
-import {provideZoneChangeDetection} from '@angular/core';
 /**
  * Copyright 2024 Google LLC
  *
@@ -14,6 +13,7 @@ import {provideZoneChangeDetection} from '@angular/core';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {provideZoneChangeDetection} from '@angular/core';
 import {bootstrapApplication} from '@angular/platform-browser';
 import {AppComponent} from './app/app.component';
 import {appConfig} from './app/app.config';

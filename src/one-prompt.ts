@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { getFileById } from './drive-api';
-import { PromptPart } from './gemini';
-import { DropdownsSheetReader } from './dropdowns-sheet-reader';
+import {getFileById} from './drive-api';
+import {PromptPart} from './gemini';
+import {DropdownsSheetReader} from './dropdowns-sheet-reader';
 
 /**
  * A mapping of ingredient names to their Google Drive file IDs.
@@ -78,7 +78,7 @@ export class OnePrompt {
       promptSuffix
     );
 
-    const promptParts: PromptPart[] = [{ type: 'text', value: textPrompt }];
+    const promptParts: PromptPart[] = [{type: 'text', value: textPrompt}];
 
     if (ingredientsAsObject) {
       for (const [name, fileId] of Object.entries(ingredientsAsObject)) {

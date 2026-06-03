@@ -22,7 +22,7 @@
  */
 export function getImageResolution(
   blob: GoogleAppsScript.Base.Blob
-): { width: number; height: number } | null {
+): {width: number; height: number} | null {
   const bytes = blob.getBytes();
   const mimeType = blob.getContentType();
 
@@ -42,7 +42,7 @@ export function getImageResolution(
  */
 function getPngResolution(
   bytes: number[]
-): { width: number; height: number } | null {
+): {width: number; height: number} | null {
   // PNG signature: 89 50 4E 47 0D 0A 1A 0A
   if (
     bytes.length < 24 ||
@@ -60,7 +60,7 @@ function getPngResolution(
   const width = readInt32(bytes, 16);
   const height = readInt32(bytes, 20);
 
-  return { width, height };
+  return {width, height};
 }
 
 /**
@@ -72,7 +72,7 @@ function getPngResolution(
  */
 function getJpegResolution(
   bytes: number[]
-): { width: number; height: number } | null {
+): {width: number; height: number} | null {
   let i = 2;
   while (i < bytes.length) {
     // 0xFF start of marker
@@ -97,7 +97,7 @@ function getJpegResolution(
       }
       const height = readInt16(bytes, i + 5);
       const width = readInt16(bytes, i + 7);
-      return { width, height };
+      return {width, height};
     }
 
     // Move to next marker
