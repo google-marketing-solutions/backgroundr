@@ -36,7 +36,7 @@ describe('AppComponent', () => {
       imports: [AppComponent],
       schemas: [NO_ERRORS_SCHEMA],
     }).overrideComponent(AppComponent, {
-      set: { imports: [CommonModule], schemas: [NO_ERRORS_SCHEMA] },
+      set: {imports: [CommonModule], schemas: [NO_ERRORS_SCHEMA]},
     });
   });
 
@@ -50,7 +50,7 @@ describe('AppComponent', () => {
     // Setup initial state with some selections
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance as unknown as {
-      selectedValues: { [key: string]: string | null };
+      selectedValues: {[key: string]: string | null};
       selectedIngredients: {
         [key: string]: {
           name: string;
@@ -61,9 +61,9 @@ describe('AppComponent', () => {
       dropdownsData: Record<string, string[]>;
       loadDropDowns(): void;
     };
-    app.selectedValues = { OldDropdown: 'OldValue' };
+    app.selectedValues = {OldDropdown: 'OldValue'};
     app.selectedIngredients = {
-      OldIngredient: { name: 'Old', thumbnail: '', fileId: '1' },
+      OldIngredient: {name: 'Old', thumbnail: '', fileId: '1'},
     };
 
     // Mock google.script.run
@@ -74,9 +74,9 @@ describe('AppComponent', () => {
             loadDropDowns: () => {
               // Simulate returning new data that does NOT have the old keys
               callback({
-                variants: { NewDropdown: ['NewValue'] },
+                variants: {NewDropdown: ['NewValue']},
                 ingredients: {
-                  NewIngredient: [{ name: 'New', thumbnail: '', fileId: '2' }],
+                  NewIngredient: [{name: 'New', thumbnail: '', fileId: '2'}],
                 },
               });
             },

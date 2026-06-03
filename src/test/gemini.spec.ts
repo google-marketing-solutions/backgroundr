@@ -56,8 +56,8 @@ describe('VertexAiApi', () => {
     it('should return base64 image strings on success', () => {
       const mockResponse = {
         predictions: [
-          { bytesBase64Encoded: 'image-bytes-1' },
-          { bytesBase64Encoded: 'image-bytes-2' },
+          {bytesBase64Encoded: 'image-bytes-1'},
+          {bytesBase64Encoded: 'image-bytes-2'},
         ],
       };
       mockUrlFetchApp(200, JSON.stringify(mockResponse));
@@ -77,8 +77,8 @@ describe('VertexAiApi', () => {
           method: 'post',
           contentType: 'application/json',
           payload: JSON.stringify({
-            instances: [{ prompt: 'Generate a cool background' }],
-            parameters: { sampleCount: 2 },
+            instances: [{prompt: 'Generate a cool background'}],
+            parameters: {sampleCount: 2},
           }),
         })
       );
@@ -111,8 +111,8 @@ describe('VertexAiApi', () => {
           {
             content: {
               parts: [
-                { inlineData: { data: 'Hello ' } },
-                { inlineData: { data: 'World!' } },
+                {inlineData: {data: 'Hello '}},
+                {inlineData: {data: 'World!'}},
               ],
             },
           },
@@ -120,7 +120,7 @@ describe('VertexAiApi', () => {
       };
       mockUrlFetchApp(200, JSON.stringify(mockResponse));
 
-      const promptParts: PromptPart[] = [{ type: 'text', value: 'Say hello' }];
+      const promptParts: PromptPart[] = [{type: 'text', value: 'Say hello'}];
       const result = api.callGeminiApi(promptParts, false);
 
       expect(result).toBe('Hello World!');
@@ -131,14 +131,14 @@ describe('VertexAiApi', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Parsed JSON result text' }],
+              parts: [{text: 'Parsed JSON result text'}],
             },
           },
         ],
       };
       mockUrlFetchApp(200, JSON.stringify(mockResponse));
 
-      const promptParts: PromptPart[] = [{ type: 'text', value: 'Give JSON' }];
+      const promptParts: PromptPart[] = [{type: 'text', value: 'Give JSON'}];
       const result = api.callGeminiApi(promptParts, true);
 
       expect(result).toBe('Parsed JSON result text');
@@ -154,9 +154,9 @@ describe('VertexAiApi', () => {
         '16:9'
       );
 
-      mockUrlFetchApp(200, JSON.stringify({ candidates: [] }));
+      mockUrlFetchApp(200, JSON.stringify({candidates: []}));
 
-      multimodalApi.callGeminiApi([{ type: 'text', value: 'test' }]);
+      multimodalApi.callGeminiApi([{type: 'text', value: 'test'}]);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
@@ -170,13 +170,13 @@ describe('VertexAiApi', () => {
     });
 
     it('should include responseSchema when schema is set', () => {
-      mockUrlFetchApp(200, JSON.stringify({ candidates: [] }));
+      mockUrlFetchApp(200, JSON.stringify({candidates: []}));
 
       const schema = {
         type: 'OBJECT',
-        properties: { key: { type: 'STRING' } },
+        properties: {key: {type: 'STRING'}},
       };
-      api.callGeminiApi([{ type: 'text', value: 'test' }], false, schema);
+      api.callGeminiApi([{type: 'text', value: 'test'}], false, schema);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
@@ -190,9 +190,9 @@ describe('VertexAiApi', () => {
     it('should throw GeminiApiCallError on non-200 response', () => {
       mockUrlFetchApp(400, 'Bad Request');
 
-      expect(() =>
-        api.callGeminiApi([{ type: 'text', value: 'test' }])
-      ).toThrow('Bad Request');
+      expect(() => api.callGeminiApi([{type: 'text', value: 'test'}])).toThrow(
+        'Bad Request'
+      );
     });
 
     it('should retry on 429 and succeed subsequently', () => {
@@ -200,7 +200,7 @@ describe('VertexAiApi', () => {
         candidates: [
           {
             content: {
-              parts: [{ text: 'Success after retry' }],
+              parts: [{text: 'Success after retry'}],
             },
           },
         ],
@@ -222,7 +222,7 @@ describe('VertexAiApi', () => {
           }),
       };
 
-      const result = api.callGeminiApi([{ type: 'text', value: 'test' }], true);
+      const result = api.callGeminiApi([{type: 'text', value: 'test'}], true);
       expect(result).toBe('Success after retry');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledTimes(2);
@@ -240,9 +240,9 @@ describe('VertexAiApi', () => {
         }),
       };
 
-      expect(() =>
-        api.callGeminiApi([{ type: 'text', value: 'test' }])
-      ).toThrow('RESOURCE_EXHAUSTED');
+      expect(() => api.callGeminiApi([{type: 'text', value: 'test'}])).toThrow(
+        'RESOURCE_EXHAUSTED'
+      );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledTimes(4);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -269,7 +269,7 @@ describe('VertexAiApi', () => {
       };
 
       expect(() =>
-        customApi.callGeminiApi([{ type: 'text', value: 'test' }])
+        customApi.callGeminiApi([{type: 'text', value: 'test'}])
       ).toThrow('RESOURCE_EXHAUSTED');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledTimes(2);
@@ -298,7 +298,7 @@ describe('VertexAiApi', () => {
       };
 
       expect(() =>
-        customApi.callGeminiApi([{ type: 'text', value: 'test' }])
+        customApi.callGeminiApi([{type: 'text', value: 'test'}])
       ).toThrow('RESOURCE_EXHAUSTED');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((global as any).Utilities.sleep).toHaveBeenCalledWith(
@@ -313,9 +313,9 @@ describe('VertexAiApi', () => {
     it('should throw JsonParseError when response is not valid JSON', () => {
       mockUrlFetchApp(200, 'Not a JSON string');
 
-      expect(() =>
-        api.callGeminiApi([{ type: 'text', value: 'test' }])
-      ).toThrow('Not a JSON string');
+      expect(() => api.callGeminiApi([{type: 'text', value: 'test'}])).toThrow(
+        'Not a JSON string'
+      );
     });
   });
 });
@@ -339,7 +339,7 @@ describe('queryGemini', () => {
       candidates: [
         {
           content: {
-            parts: [{ text: 'Success' }],
+            parts: [{text: 'Success'}],
           },
         },
       ],
@@ -354,7 +354,7 @@ describe('queryGemini', () => {
     };
 
     const result = queryGemini(
-      [{ type: 'text', value: 'test' }],
+      [{type: 'text', value: 'test'}],
       'my-project',
       'mocked-model'
     );

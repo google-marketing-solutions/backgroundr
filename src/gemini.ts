@@ -61,7 +61,7 @@ interface GeminiApiResponse {
  * Represents the full request payload structure sent to Gemini.
  */
 interface GeminiRequestPayload {
-  contents: Array<{ role: string; parts: GeminiRequest[] }>;
+  contents: Array<{role: string; parts: GeminiRequest[]}>;
   generationConfig: {
     temperature: number;
     maxOutputTokens: number;
@@ -71,13 +71,13 @@ interface GeminiRequestPayload {
     imageConfig?: {
       aspectRatio: string;
       imageSize: string;
-      imageOutputOptions: { mimeType: string };
+      imageOutputOptions: {mimeType: string};
       personGeneration: string;
     };
     responseSchema?: Record<string, unknown>;
     responseMimeType?: string;
   };
-  safetySettings: Array<{ category: string; threshold: string }>;
+  safetySettings: Array<{category: string; threshold: string}>;
 }
 
 /**
@@ -193,9 +193,9 @@ export class VertexAiApi {
    * @throws {JsonParseError} If JSON parsing fails.
    */
   callImageGenerationApi(prompt: string, sampleCount = 4) {
-    const options = { ...this.baseOptions };
+    const options = {...this.baseOptions};
     const payload = {
-      instances: [{ prompt }],
+      instances: [{prompt}],
       parameters: {
         sampleCount,
       },
@@ -231,12 +231,12 @@ export class VertexAiApi {
    * @throws {JsonParseError} If parsing the JSON response fails.
    */
   callGeminiApi(promptParts: PromptPart[], json = false, responseSchema = {}) {
-    const options = { ...this.baseOptions };
+    const options = {...this.baseOptions};
 
     const parts: GeminiRequest[] = [];
     for (const part of promptParts) {
       if (part.type === 'text') {
-        parts.push({ text: part.value });
+        parts.push({text: part.value});
       } else if (part.type === 'image') {
         parts.push({
           inlineData: {

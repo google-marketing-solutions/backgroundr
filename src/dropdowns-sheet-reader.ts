@@ -68,7 +68,7 @@ export class DropdownsSheetReader {
    */
   static getElementsMenu(
     sheetName: string
-  ): { title: string; items: string[] }[] {
+  ): {title: string; items: string[]}[] {
     const spreadsheet = SpreadsheetApp?.getActiveSpreadsheet();
     if (!spreadsheet) {
       throw new Error('No active spreadsheet found');
@@ -94,7 +94,7 @@ export class DropdownsSheetReader {
     }
 
     const headers = data[0];
-    const menus: { title: string; items: string[] }[] = [];
+    const menus: {title: string; items: string[]}[] = [];
 
     headers.forEach((title, index) => {
       if (title) {

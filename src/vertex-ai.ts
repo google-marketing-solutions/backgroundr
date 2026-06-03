@@ -24,10 +24,10 @@ const baseParams: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
   method: 'post',
   muteHttpExceptions: true,
   contentType: 'application/json',
-  headers: { Authorization: `Bearer ${ScriptApp.getOAuthToken()}` },
+  headers: {Authorization: `Bearer ${ScriptApp.getOAuthToken()}`},
 };
 const createRequestOptions = (payload: unknown) =>
-  Object.assign({ payload: JSON.stringify(payload) }, baseParams);
+  Object.assign({payload: JSON.stringify(payload)}, baseParams);
 const fetchJson = <T>(
   url: string,
   params: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions

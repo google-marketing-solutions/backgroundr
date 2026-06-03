@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DropdownsSheetReader } from '../dropdowns-sheet-reader';
+import {DropdownsSheetReader} from '../dropdowns-sheet-reader';
 
 describe('DropdownsSheetReader', () => {
   beforeEach(() => {

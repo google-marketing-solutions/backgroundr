@@ -67,26 +67,26 @@ export interface MenuData {
  * images using Gemini.
  */
 @Component({
-    selector: 'app-root',
-    imports: [
-        CommonModule,
-        MatButtonModule,
-        MatDividerModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatExpansionModule,
-        MatCardModule,
-        MatProgressBarModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatIconModule,
-        MatSelectModule,
-        MatCheckboxModule,
-        MatTooltipModule,
-        MatSlideToggleModule,
-    ],
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+  selector: 'app-root',
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatExpansionModule,
+    MatCardModule,
+    MatProgressBarModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatIconModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatTooltipModule,
+    MatSlideToggleModule,
+  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
   /** Indicates whether a backend operation is running. */
@@ -99,13 +99,13 @@ export class AppComponent implements OnInit {
   protected loadingProgress: number | undefined;
 
   /** Available variant options grouped by category. */
-  protected dropdownsData: DropdownData = { 'Loading...': [] };
+  protected dropdownsData: DropdownData = {'Loading...': []};
 
   /** The target number of images to generate per batch. */
   protected numberOfImages = 1;
 
   /** Map storing selected values for custom dropdown categories. */
-  protected selectedValues: { [key: string]: string | null } = {};
+  protected selectedValues: {[key: string]: string | null} = {};
 
   /**
    * Controls whether automatically generated images will be evaluated by
@@ -231,7 +231,7 @@ export class AppComponent implements OnInit {
    */
   protected generateSelected(): void {
     this.isLoading = true;
-    const selectedIngredientIds: { [key: string]: string | null } = {};
+    const selectedIngredientIds: {[key: string]: string | null} = {};
     for (const key in this.selectedIngredients) {
       const ingredient = this.selectedIngredients[key];
       selectedIngredientIds[key] = ingredient ? ingredient.fileId : null;
@@ -253,7 +253,7 @@ export class AppComponent implements OnInit {
    * based on global config without using explicit custom selections.
    */
   protected generateAutomatically(): void {
-    const selectedIngredientIds: { [key: string]: string | null } = {};
+    const selectedIngredientIds: {[key: string]: string | null} = {};
     for (const [key, ingredient] of Object.entries(this.selectedIngredients)) {
       selectedIngredientIds[key] = ingredient ? ingredient.fileId : null;
     }

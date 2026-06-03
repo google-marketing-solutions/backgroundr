@@ -75,7 +75,7 @@ describe('Image Utilities', () => {
       ];
 
       const blob = createMockBlob(bytes, 'image/png');
-      expect(getImageResolution(blob)).toEqual({ width: 800, height: 600 });
+      expect(getImageResolution(blob)).toEqual({width: 800, height: 600});
     });
 
     it('should return null for PNG with invalid signature length', () => {
@@ -116,7 +116,7 @@ describe('Image Utilities', () => {
       ];
 
       const blob = createMockBlob(bytes, 'image/jpeg');
-      expect(getImageResolution(blob)).toEqual({ width: 200, height: 150 });
+      expect(getImageResolution(blob)).toEqual({width: 200, height: 150});
     });
 
     it('should correctly parse JPEG SOF2 dimensions', () => {
@@ -135,7 +135,7 @@ describe('Image Utilities', () => {
       ];
 
       const blob = createMockBlob(bytes, 'image/jpeg');
-      expect(getImageResolution(blob)).toEqual({ width: 300, height: 100 });
+      expect(getImageResolution(blob)).toEqual({width: 300, height: 100});
     });
 
     it('should skip other markers and find SOF0/SOF2', () => {
@@ -162,7 +162,7 @@ describe('Image Utilities', () => {
       ];
 
       const blob = createMockBlob(bytes, 'image/jpeg');
-      expect(getImageResolution(blob)).toEqual({ width: 120, height: 90 });
+      expect(getImageResolution(blob)).toEqual({width: 120, height: 90});
     });
 
     it('should handle truncated or invalid segment length', () => {

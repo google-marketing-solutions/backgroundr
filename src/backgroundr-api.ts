@@ -64,7 +64,7 @@ export class BackgroundrClient {
   separate(image: GoogleAppsScript.Base.Blob) {
     const response = this.sendRequest('separate', {
       method: 'post',
-      payload: { image: this.convertBlobToBase64(image) },
+      payload: {image: this.convertBlobToBase64(image)},
     });
     return JSON.parse(response.getContentText()) as BackgroundrSeparateResponse;
   }
@@ -72,7 +72,7 @@ export class BackgroundrClient {
   register(image: GoogleAppsScript.Base.Blob, token?: string) {
     return this.sendRequest('register', {
       method: 'post',
-      payload: { image: this.convertBlobToBase64(image), token },
+      payload: {image: this.convertBlobToBase64(image), token},
     });
   }
 

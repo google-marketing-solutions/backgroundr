@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ensureFolderExists, getFileById, listFiles } from './drive-api';
-import { getPredictionEndpoint, predict } from './vertex-ai';
+import {ensureFolderExists, getFileById, listFiles} from './drive-api';
+import {getPredictionEndpoint, predict} from './vertex-ai';
 
 const HEADER_ROWS = 1;
 const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
