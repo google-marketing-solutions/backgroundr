@@ -25,7 +25,8 @@ export default {
     format: 'esm',
   },
   plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
+    typescript({ include: ['src/**/*.ts'] }),
+    cleanup({ comments: 'none', extensions: ['.js', '.ts'] }),
     license({
       banner: {
         content: {
@@ -33,7 +34,13 @@ export default {
         },
       },
     }),
-    typescript(),
+    {
+      name: 'strip-exports',
+      renderChunk(code) {
+        const cleanCode = code.replace(/export\s+\{[\s\S]*\};/g, '');
+        return { code: cleanCode, map: null };
+      }
+    }
   ],
   context: 'this',
 };
