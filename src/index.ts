@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,238 +14,209 @@
  * limitations under the License.
  */
 
-import {ensureFolderExists, getFileById, listFiles} from './drive-api';
-import {getPredictionEndpoint, predict} from './vertex-ai';
+import {Config} from './config';
+import {DropdownsSheetReader} from './dropdowns-sheet-reader';
+import {
+  BackgroundDefinition,
+  getImageAssets,
+  processImageAssets,
+  saveSelectedImages,
+} from './image-service';
+import {loadIngredients} from './ingredients';
+import {OnePrompt} from './one-prompt';
 
 const HEADER_ROWS = 1;
-const IMAGE_SHEET = SpreadsheetApp.getActive().getSheetByName('Images');
-const SCALED_SHEET = SpreadsheetApp.getActive().getSheetByName('Scaled');
 
-interface BackgroundDefinition {
-  title: string;
-  description: string;
-}
-
-interface ImageQueue {
-  folderId: string;
-  outputFolderId: string;
-  fileName: string;
-  fileId: string;
-  prompt: string;
-  variationId: number;
-}
-
-interface Config {
-  driveFolderId: string;
-  projectId: string;
-  modelId: string;
-  region: string;
-  backgroundDefinitions: BackgroundDefinition[];
-}
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
-function doGet() {
+/**
+ * Serves the HTML entry point for the sidebar.
+ */
+export function doGet(): GoogleAppsScript.HTML.HtmlOutput {
   return HtmlService.createTemplateFromFile('ui').evaluate();
 }
 
-function include(filename: string) {
+/**
+ * Helper function to inline HTML assets into parent templates.
+ */
+export function include(filename: string): string {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
-function onOpen() {
+/**
+ * Creates custom menus in the Google Sheet workspace.
+ */
+export function onOpen(): void {
   SpreadsheetApp.getUi()
-    .createMenu('BackgroundR')
-    .addItem('Open', 'showSidebar')
-    .addItem('Run scaled', 'getImagesToProcess')
+    .createMenu('BackgroundR on 🍌s')
+    .addItem('🎨 Open configurator', 'showSidebar')
+    .addItem('📥 Load images from Google Drive', 'getImagesFromDrive')
+    .addItem('💾 Save selected images to Drive', 'saveSelectedImagesToDrive')
+    .addItem('🧹 Clear generated images', 'clearGeneratedImages')
     .addToUi();
 }
 
-function showSidebar() {
+/**
+ * Prompts user confirmation and clears all generated variation images from the spreadsheet.
+ */
+export function clearGeneratedImages(): void {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    'Confirm',
+    'Are you sure you want to clear generated images?',
+    ui.ButtonSet.YES_NO
+  );
+  if (response !== ui.Button.YES) {
+    return;
+  }
+
+  const imageSheet = SpreadsheetApp.getActive().getSheetByName('Images');
+  if (!imageSheet) {
+    throw new Error("Sheet 'Images' not found");
+  }
+  imageSheet.getDataRange().offset(HEADER_ROWS, 2).clearContent();
+}
+
+/**
+ * Prompts confirmation and loads all images from the configured Drive folder into the sheet.
+ */
+export function getImagesFromDrive(): void {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    'Confirm',
+    'This will clear the current images and load new ones from Drive. Continue?',
+    ui.ButtonSet.YES_NO
+  );
+  if (response !== ui.Button.YES) {
+    return;
+  }
+  const config = Config.readConfig();
+  getImageAssets(config['Drive Folder Id']);
+}
+
+/**
+ * Evaluates the Sidebar template and renders the component sidebar panel.
+ */
+export function showSidebar(): void {
   SpreadsheetApp.getUi().showSidebar(
     HtmlService.createTemplateFromFile('ui').evaluate().setTitle(' ')
   );
 }
 
-const getImagesToProcess = () => {
-  if (!SCALED_SHEET) {
-    throw `Sheet 'Scaled' not found`;
-  }
-
-  const dataRange = SCALED_SHEET.getDataRange();
-  const values = dataRange.getValues();
-  const imageQueue: ImageQueue[] = [];
-
-  for (let i = 1; i < values.length; i++) {
-    const folderId = values[i][1];
-    const status = values[i][0];
-    const prompts = new Set<string>();
-    if (folderId === '' || status === 'DONE') {
-      continue;
-    }
-    for (let p = 2; p < values[i].length; p++) {
-      if (values[i][p] === '') {
-        break;
-      }
-      prompts.add(values[i][p]);
-    }
-    const outputFolderId = ensureFolderExists(folderId);
-    listFiles(folderId).forEach((file: GoogleAppsScript.Drive.File) => {
-      let variationId = 1;
-      prompts.forEach(prompt => {
-        imageQueue.push({
-          folderId,
-          outputFolderId,
-          fileName: file.getName(),
-          fileId: file.getId(),
-          prompt,
-          variationId,
-        });
-        variationId++;
-      });
-    });
-  }
-  return imageQueue;
-};
-
-const getImageAssets = (folderId: string) => {
-  if (!IMAGE_SHEET) {
-    throw `Sheet 'Images' not found`;
-  }
-  IMAGE_SHEET.getDataRange().offset(HEADER_ROWS, 0).clearContent();
-
-  listFiles(folderId)
-    .filter((file: GoogleAppsScript.Drive.File) => file.getSize() < 10000000)
-    .slice(0, 10) // Sample 10 images under 10 Mb.
-    .forEach((file: GoogleAppsScript.Drive.File) => {
-      const fileBlob = file.getBlob();
-      const bytes = fileBlob.getBytes();
-      const base64Data = Utilities.base64Encode(bytes);
-      const dataUrl = `data:${file.getMimeType()};base64,${base64Data}`;
-      const cellImage = SpreadsheetApp.newCellImage()
-        .setSourceUrl(dataUrl)
-        .build();
-      const row = [cellImage, file.getId()];
-      const sheetRow = IMAGE_SHEET.getLastRow() + 1;
-      IMAGE_SHEET.getRange(sheetRow, 1, 1, row.length).setValues([row]);
-      IMAGE_SHEET.setRowHeight(sheetRow, 256);
-      IMAGE_SHEET.setColumnWidth(1, 256);
-    });
-};
-
-const processImageAssets = (
-  backgroundDefinitions: BackgroundDefinition[],
-  projectId: string,
-  region: string,
-  modelId: string,
-  backgroundRemoval: boolean
-) => {
-  if (!IMAGE_SHEET) {
-    throw `Sheet 'Images' not found`;
-  }
-  const imageGenerationEndpoint = getPredictionEndpoint(
-    projectId,
-    region,
-    modelId
+/**
+ * Loads variant options, ingredients, and categorized menus to populate sidebar components.
+ * Triggered from Angular frontend via `google.script.run`.
+ */
+export function loadDropDowns(): {
+  variants: {[key: string]: string[]};
+  ingredients: {
+    [key: string]: {name: string; thumbnail: string; fileId: string}[];
+  };
+  menus: {title: string; items: string[]}[];
+} {
+  const config = Config.readConfig();
+  const dropdownsData = DropdownsSheetReader.getDropdowns(
+    config['Dropdowns sheet']
   );
-  IMAGE_SHEET.getRange('B:B')
-    .offset(HEADER_ROWS, 0)
-    .getValues()
-    .forEach(([id], currentIndex) => {
-      if (!id) {
-        return;
-      }
-      const file = getFileById(id);
-      const fileBlob = file.getBlob();
-      const bytes = fileBlob.getBytes();
-      const base64Data = Utilities.base64Encode(bytes);
-      try {
-        const variations = backgroundDefinitions.map((e, bgIndex) => {
-          const currentImage = IMAGE_SHEET.getRange(
-            currentIndex + 1 + HEADER_ROWS,
-            5 + bgIndex,
-            1,
-            1
-          ).getValue();
-          if (currentImage !== '') {
-            return null;
-          }
-          const result = predict(
-            `${e.description}`,
-            base64Data,
-            imageGenerationEndpoint,
-            modelId,
-            backgroundRemoval
-          );
-          return SpreadsheetApp.newCellImage()
-            .setSourceUrl(
-              `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`
-            )
-            .build();
-        });
-        variations.forEach((img, i) => {
-          if (img) {
-            IMAGE_SHEET.getRange(
-              currentIndex + 1 + HEADER_ROWS,
-              5 + i
-            ).setValue(img);
-          }
-        });
-        for (let i = 3; i < 5 + backgroundDefinitions.length; i++) {
-          IMAGE_SHEET.setColumnWidth(i, 256);
-        }
-      } catch (e) {
-        IMAGE_SHEET.getRange(currentIndex + 1, 1, 1, 1)
-          .offset(HEADER_ROWS, 4)
-          .setValue(`Error: ${e}`);
-      }
-    });
-};
-
-const setHeaders = (backgroundDefinitions: BackgroundDefinition[]) => {
-  if (!IMAGE_SHEET) {
-    throw `Sheet 'Images' not found`;
+  const ingredientsData = loadIngredients();
+  let elementsMenu: {title: string; items: string[]}[];
+  if (config['Elements Menu sheet']) {
+    elementsMenu = DropdownsSheetReader.getElementsMenu(
+      config['Elements Menu sheet']
+    );
+  } else {
+    elementsMenu = [];
+    const dropdownKeys = Object.keys(dropdownsData);
+    if (dropdownKeys.length > 0) {
+      elementsMenu.push({title: 'Dropdowns', items: dropdownKeys});
+    }
+    const ingredientKeys = Object.keys(ingredientsData);
+    if (ingredientKeys.length > 0) {
+      elementsMenu.push({title: 'Ingredients', items: ingredientKeys});
+    }
   }
-  IMAGE_SHEET?.getRange('E1:Z1').clearContent();
-  IMAGE_SHEET?.getRange(1, 5, 1, backgroundDefinitions.length).setValues([
-    backgroundDefinitions.map(e => e.title),
-  ]);
-};
+  return {
+    variants: dropdownsData,
+    ingredients: ingredientsData,
+    menus: elementsMenu,
+  };
+}
 
-const addFolderToQueue = (
-  folderName: string,
-  backgroundDefinitions: BackgroundDefinition[]
-) => {
-  if (!SCALED_SHEET) {
-    throw `Sheet 'Scaled' not found`;
+/**
+ * Resolves descriptions using categories selections and starts variation images generation.
+ * Triggered from Angular frontend via `google.script.run`.
+ */
+export function generateImages(
+  numberOfImages = 1,
+  partsAsObject?: {
+    [key: string]: string | null;
+  },
+  scoringThreshold?: number,
+  maxRegenerations?: number,
+  imageAspectRatio?: string,
+  ingredientsAsObject?: {
+    [key: string]: string | null;
   }
-  SCALED_SHEET.appendRow([
-    '',
-    folderName,
-    ...backgroundDefinitions.map(e => e.description),
-  ]);
-  SpreadsheetApp.getActive().setActiveSheet(SCALED_SHEET);
-};
+): void {
+  const config = Config.readConfig();
+  const prefix = config['Prompt Prefix'];
+  const suffix = config['Prompt Suffix'];
 
-const getOAuthToken = () => {
-  return ScriptApp.getOAuthToken();
-};
+  const prompt = partsAsObject
+    ? OnePrompt.generatePrompt(
+        partsAsObject,
+        prefix,
+        suffix,
+        ingredientsAsObject as {[key: string]: string | null} | undefined
+      )
+    : OnePrompt.generatePromptForSheet(
+        config['Dropdowns sheet'],
+        prefix,
+        suffix,
+        ingredientsAsObject as {[key: string]: string | null} | undefined
+      );
 
-const getConfig = (): Config => {
-  const config = PropertiesService.getScriptProperties().getProperty('config');
-  return config
-    ? JSON.parse(config)
-    : {
-        driveFolderId: '',
-        projectId: '',
-        modelId: '',
-        region: '',
-        backgroundDefinitions: [],
-      };
-};
+  console.log({prompt});
 
-const setConfig = (config: Config) => {
-  PropertiesService.getScriptProperties().setProperty(
-    'config',
-    JSON.stringify(config)
+  const manyPrompts: BackgroundDefinition[] = new Array(numberOfImages)
+    .fill(prompt)
+    .map(p => ({
+      description: p,
+    }));
+
+  processImageAssets(
+    manyPrompts,
+    config['Cloud Project Id'],
+    config['GCP Location'],
+    config['Image Generation Model'],
+    scoringThreshold,
+    maxRegenerations,
+    imageAspectRatio
   );
-};
+}
+
+/**
+ * Downloads and saves all selected variations inside the active range to the configured Google Drive folder.
+ */
+export function saveSelectedImagesToDrive(): void {
+  const config = Config.readConfig();
+  const parentFolderId = config['Drive Folder Id'];
+  if (!parentFolderId) {
+    SpreadsheetApp.getActive().toast('Drive Folder Id not configured', 'Error');
+    return;
+  }
+
+  try {
+    const selection = SpreadsheetApp.getActive().getSelection();
+    const result = saveSelectedImages(selection, parentFolderId);
+
+    const html = HtmlService.createHtmlOutput(
+      `<p>Saved ${result.savedCount} images to folder <a href="${result.folderUrl}" target="_blank">${result.folderName}</a></p>`
+    )
+      .setWidth(300)
+      .setHeight(80);
+    SpreadsheetApp.getUi().showModelessDialog(html, 'Images Saved');
+  } catch (e: unknown) {
+    console.error(e);
+    const message = e instanceof Error ? e.message : String(e);
+    SpreadsheetApp.getActive().toast(message, 'Error');
+  }
+}
