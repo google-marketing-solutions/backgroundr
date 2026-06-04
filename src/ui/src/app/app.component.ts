@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CommonModule} from '@angular/common';
-import {Component, NgZone, OnInit} from '@angular/core';
+import {Component, ChangeDetectorRef, OnInit} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -151,7 +151,7 @@ export class AppComponent implements OnInit {
     [key: string]: IngredientItem | null;
   } = {};
 
-  constructor(private readonly zone: NgZone) {}
+  constructor(private readonly cdr: ChangeDetectorRef) {}
 
   /**
    * Angular Lifecycle hook invoked after component initialization.
@@ -190,29 +190,34 @@ export class AppComponent implements OnInit {
           ingredients: IngredientsData;
           menus: MenuData[];
         }) => {
-          this.zone.run(() => {
-            this.dropdownsData = dropdowns.variants;
-            this.ingredientsData = dropdowns.ingredients;
-            this.menus = dropdowns.menus;
+          this.dropdownsData = dropdowns.variants;
+          this.ingredientsData = dropdowns.ingredients;
+          this.menus = dropdowns.menus;
 
-            // Prune selectedValues that are no longer valid
-            for (const key in this.selectedValues) {
-              if (!(key in this.dropdownsData)) {
-                delete this.selectedValues[key];
-              }
+          // Prune selectedValues that are no longer valid
+          for (const key of Object.keys(this.selectedValues)) {
+            if (!(key in this.dropdownsData)) {
+              delete this.selectedValues[key];
             }
+          }
 
-            // Prune selectedIngredients that are no longer valid
-            for (const key in this.selectedIngredients) {
-              if (!(key in this.ingredientsData)) {
-                delete this.selectedIngredients[key];
-              }
+          // Prune selectedIngredients that are no longer valid
+          for (const key of Object.keys(this.selectedIngredients)) {
+            if (!(key in this.ingredientsData)) {
+              delete this.selectedIngredients[key];
             }
+          }
 
-            this.isLoading = false;
-          });
+          this.isLoading = false;
+          this.cdr.markForCheck();
         }
       )
+      .withFailureHandler((err: any) => {
+        console.error('Failed to load dropdowns:', err);
+        this.dropdownsData = {'Error loading configurations': [err.message || String(err)]};
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      })
       .loadDropDowns();
   }
 
@@ -220,9 +225,8 @@ export class AppComponent implements OnInit {
    * Helper callback to finalize loading status and hide progress bars.
    */
   protected setLoadingToFinished(): void {
-    this.zone.run(() => {
-      this.isLoading = false;
-    });
+    this.isLoading = false;
+    this.cdr.markForCheck();
   }
 
   /**
@@ -238,6 +242,12 @@ export class AppComponent implements OnInit {
     }
     google.script.run
       .withSuccessHandler(() => this.setLoadingToFinished())
+      .withFailureHandler((err: any) => {
+        console.error('Generation failed:', err);
+        alert('Generation failed: ' + (err.message || String(err)));
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      })
       .generateImages(
         this.numberOfImages,
         this.selectedValues,
@@ -260,6 +270,12 @@ export class AppComponent implements OnInit {
     this.isLoading = true;
     google.script.run
       .withSuccessHandler(() => this.setLoadingToFinished())
+      .withFailureHandler((err: any) => {
+        console.error('Generation failed:', err);
+        alert('Generation failed: ' + (err.message || String(err)));
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      })
       .generateImages(
         this.numberOfImages,
         undefined,
