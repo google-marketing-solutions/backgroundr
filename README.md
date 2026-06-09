@@ -24,7 +24,7 @@ limitations under the License.
 
 ## 📖 Overview
 
-**BackgroundR 2.0** leverages Google's **Nano Banano** model for comprehensive AI image editing. Far beyond simple background replacement, it instantly performs any visual edit needed to align your image assets with your corporate brand guidelines.
+**BackgroundR 2.0** leverages Google's **Nano Banana** model for comprehensive AI image editing. Far beyond simple background replacement, it instantly performs any visual edit needed to align your image assets with your corporate brand guidelines.
 
 Built as an elegant, web-native Google Sheets Add-on, BackgroundR lets you process images in bulk directly from Google Sheets, powered by Gemini Enterprise Agent Platform (formerly Vertex AI).
 
@@ -32,7 +32,7 @@ Built as an elegant, web-native Google Sheets Add-on, BackgroundR lets you proce
 
 ## ✨ Key Features
 
-- 🍌 **State-of-the-art AI Models**: Native integration with **Nano Banano**.
+- 🍌 **State-of-the-art AI Models**: Native integration with **Nano Banana**.
 - ⚙️ **Configurable Prompts**: Prepend and append custom prompt prefixes/suffixes automatically to match your brand style.
 - 📂 **Bulk Google Drive Syncing**: Load and save images to and from designated Drive folders seamlessly.
 - 📐 **Advanced Multi-variant Generation**: Custom sheets to define ingredient images and text variants to overlay or outpaint.
@@ -46,7 +46,7 @@ BackgroundR uses a modern, lightweight stack to deliver advanced GenAI features 
 
 - **Frontend (Sidebar UI)**: Built with **Angular 19** as a single-page application, optimized for seamless interactions.
 - **Backend Engine**: Powered by **TypeScript** transpiled to **Google Apps Script**, managed with [`aside`](https://github.com/google/aside).
-- **Generative AI APIs**: Integrated directly with GCP's **Gemini Enterprise Agent Platform (formerly Vertex AI)** (Nano Banano).
+- **Generative AI APIs**: Integrated directly with GCP's **Gemini Enterprise Agent Platform (formerly Vertex AI)** (Nano Banana).
 
 ---
 
@@ -84,7 +84,7 @@ Under the **Config** sheet or inside the configurator sidebar, set:
 > [!NOTE]
 > BackgroundR only creates new images for empty cells. To replace existing images, clear columns **E**, **F**, and **G** first.
 >
-> Nano Banano enforces an image size limit of ~30MB; larger files will be skipped.
+> Nano Banana enforces an image size limit of ~30MB; larger files will be skipped.
 
 ---
 
@@ -138,7 +138,7 @@ If you are looking to modify or deploy BackgroundR yourself, follow these develo
 
 ### Setup Requirements
 - **Node.js** (>= 16.x)
-- **Google [`aside`](https://github.com/google/aside)** installed globally (`npx @google/aside init`)
+- **Google Clasp** (already included in local project dependencies, or optionally installed globally: `npm install -g @google/clasp`)
 
 ### Installation
 Install the parent and UI module dependencies:
