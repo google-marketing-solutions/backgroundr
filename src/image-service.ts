@@ -42,18 +42,10 @@ interface ImageQueue {
   variationId: number;
 }
 
-function getImageSheet() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName('Images');
+function getSheet(sheetName: string): GoogleAppsScript.Spreadsheet.Sheet {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(sheetName);
   if (!sheet) {
-    throw new Error("Sheet 'Images' not found");
-  }
-  return sheet;
-}
-
-function getScaledSheet() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName('Scaled');
-  if (!sheet) {
-    throw new Error("Sheet 'Scaled' not found");
+    throw new Error(`Sheet '${sheetName}' not found`);
   }
   return sheet;
 }
@@ -62,7 +54,7 @@ function getScaledSheet() {
  * Returns a list of image files to process from the 'Scaled' queue sheet.
  */
 export function getImagesToProcess(): ImageQueue[] {
-  const scaledSheet = getScaledSheet();
+  const scaledSheet = getSheet('Scaled');
   const dataRange = scaledSheet.getDataRange();
   const values = dataRange.getValues();
   const imageQueue: ImageQueue[] = [];
@@ -106,7 +98,7 @@ export function getImagesToProcess(): ImageQueue[] {
  * @param folderId Google Drive folder containing source image assets.
  */
 export function getImageAssets(folderId: string): void {
-  const imageSheet = getImageSheet();
+  const imageSheet = getSheet('Images');
   imageSheet.getDataRange().offset(HEADER_ROWS, 0).clearContent();
 
   listFiles(folderId)
@@ -141,17 +133,7 @@ export function processImageAssets(
   imageAspectRatio?: string
 ): void {
   const config = Config.readConfig();
-  console.log({config});
-  console.log('processImageAssets', {
-    backgroundDefinitions,
-    projectId,
-    region,
-    modelId,
-    scoringThreshold,
-    maxRegenerations,
-  });
-
-  const imageSheet = getImageSheet();
+  const imageSheet = getSheet('Images');
   imageSheet
     .getRange('B:B')
     .offset(HEADER_ROWS, 0)
@@ -181,9 +163,6 @@ export function processImageAssets(
               attemptNumber < maxRegenerations + 1;
               attemptNumber++
             ) {
-              console.log(
-                `Attempt ${attemptNumber + 1} to generate image for prompt`
-              );
               resultImageBase64 = queryGemini(
                 [
                   ...e.description,
@@ -196,7 +175,6 @@ export function processImageAssets(
                 config['GCP Location']
               );
               const imageScore = scoreImage(resultImageBase64);
-              console.log(`Image score: ${imageScore}`);
 
               const cell = imageSheet.getRange(
                 currentIndex + 1 + HEADER_ROWS,
@@ -240,6 +218,8 @@ export function processImageAssets(
               .setValue(img);
           }
         });
+        // Columns 3 (C) and 4 (D) store status and logs. Columns 5 (E) onwards
+        // store the generated variation images. Set width for all these columns
         for (let i = 3; i < 5 + backgroundDefinitions.length; i++) {
           imageSheet.setColumnWidth(i, 256);
         }
@@ -258,7 +238,7 @@ export function processImageAssets(
 export function setHeaders(
   backgroundDefinitions: BackgroundDefinition[]
 ): void {
-  const imageSheet = getImageSheet();
+  const imageSheet = getSheet('Images');
   imageSheet.getRange('E1:Z1').clearContent();
   imageSheet
     .getRange(1, 5, 1, backgroundDefinitions.length)
@@ -272,7 +252,7 @@ export function addFolderToQueue(
   folderName: string,
   backgroundDefinitions: BackgroundDefinition[]
 ): void {
-  const scaledSheet = getScaledSheet();
+  const scaledSheet = getSheet('Scaled');
   scaledSheet.appendRow([
     '',
     folderName,

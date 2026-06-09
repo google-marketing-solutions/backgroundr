@@ -60,7 +60,6 @@ jest.mock('../image-service', () => ({
   saveSelectedImages: jest.fn(),
 }));
 
-// Load the index module (can do standard import now since there's no top-level executing SpreadsheetApp calls!)
 import {
   doGet,
   include,
