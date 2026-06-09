@@ -100,11 +100,11 @@ The `Config` sheet governs BackgroundR behavior. Here is a description of the co
 | **Drive Folder Id** | Google Drive Folder ID containing your source images | `1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF` |
 | **GCP Location** | Cloud region for Gemini Enterprise Agent Platform (formerly Vertex AI) API calls | `us-central1` or `europe-west3` |
 | **Dropdowns sheet** | The sheet defining your variant prompt definitions | `Dropdowns` |
-| **Ingredients sheet** | The sheet defining ingredient images assets | `Ingredients` |
+| **Ingredients sheet** | The sheet defining ingredient image assets | `Ingredients` |
 | **Prompt Prefix** | Text automatically prepended to all generated prompts | `A professional studio photo of...` |
 | **Prompt Suffix** | Text automatically appended to all generated prompts | `..., high quality, brand aligned.` |
 | **Image Scoring Prompt** | System instructions used to evaluate the quality of images | `Verify if the image looks realistic...` |
-| **Scoring results sheet**| Sheet where image scoring results are saved | `Scoring results` |
+| **Scoring results sheet** | Sheet where image scoring results are saved | `Scoring results` |
 
 ---
 
@@ -155,7 +155,7 @@ npm run serve-ui
 This spins up the Angular development server at `http://localhost:4200`.
 
 ### Deployment
-To build the TypeScript codebase, compile and inject the Angular app into Google Apps Script format, and push via [`aside`](https://github.com/google/aside):
+To build the TypeScript codebase, compile and inject the Angular app into Google Apps Script format, and push via Google Clasp:
 
 1. **Login to clasp**:
    ```bash
