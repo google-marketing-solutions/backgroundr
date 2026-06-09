@@ -21,14 +21,19 @@ import {NO_ERRORS_SCHEMA} from '@angular/core';
 
 describe('AppComponent', () => {
   beforeEach(() => {
+    const createMockRun = () => {
+      const runner = {
+        withSuccessHandler: () => runner,
+        withFailureHandler: () => runner,
+        loadDropDowns: () => {},
+        generateImages: () => {},
+      };
+      return runner;
+    };
+
     (window as unknown as Record<string, unknown>)['google'] = {
       script: {
-        run: {
-          withSuccessHandler: () => ({
-            loadDropDowns: () => {},
-            generateImages: () => {},
-          }),
-        },
+        run: createMockRun(),
       },
     };
 
@@ -70,17 +75,21 @@ describe('AppComponent', () => {
     const mockGoogle = {
       script: {
         run: {
-          withSuccessHandler: (callback: (data: unknown) => void) => ({
-            loadDropDowns: () => {
-              // Simulate returning new data that does NOT have the old keys
-              callback({
-                variants: {NewDropdown: ['NewValue']},
-                ingredients: {
-                  NewIngredient: [{name: 'New', thumbnail: '', fileId: '2'}],
-                },
-              });
-            },
-          }),
+          withSuccessHandler: (callback: (data: unknown) => void) => {
+            const runner = {
+              withFailureHandler: () => runner,
+              loadDropDowns: () => {
+                // Simulate returning new data that does NOT have the old keys
+                callback({
+                  variants: {NewDropdown: ['NewValue']},
+                  ingredients: {
+                    NewIngredient: [{name: 'New', thumbnail: '', fileId: '2'}],
+                  },
+                });
+              },
+            };
+            return runner;
+          },
         },
       },
     };
@@ -119,9 +128,13 @@ describe('AppComponent', () => {
     (window as unknown as Record<string, unknown>)['google'] = {
       script: {
         run: {
-          withSuccessHandler: () => ({
-            generateImages: generateImagesSpy,
-          }),
+          withSuccessHandler: () => {
+            const runner = {
+              withFailureHandler: () => runner,
+              generateImages: generateImagesSpy,
+            };
+            return runner;
+          },
         },
       },
     };
