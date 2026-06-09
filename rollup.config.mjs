@@ -25,7 +25,8 @@ export default {
     format: 'esm',
   },
   plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
+    typescript({ include: ['src/**/*.ts'] }),
+    cleanup({ comments: 'none', extensions: ['.js', '.ts'] }),
     license({
       banner: {
         content: {
@@ -33,7 +34,17 @@ export default {
         },
       },
     }),
-    typescript(),
+    {
+      name: 'strip-exports',
+      generateBundle(options, bundle) {
+        for (const fileName in bundle) {
+          const chunk = bundle[fileName];
+          if (chunk.type === 'chunk') {
+            chunk.code = chunk.code.replace(/export\s+\{[\s\S]*\};/g, '');
+          }
+        }
+      }
+    },
   ],
   context: 'this',
 };
