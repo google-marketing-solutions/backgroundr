@@ -17,14 +17,22 @@
 import {Config} from './config';
 import {listFiles} from './drive-api';
 
+export interface IngredientItem {
+  fileId: string;
+  name: string;
+  thumbnail: string;
+}
+
+export interface IngredientsData {
+  [category: string]: IngredientItem[];
+}
+
 /**
  * Loads ingredient asset definitions and maps them to their thumbnail preview URLs and Drive IDs.
  *
  * @returns Ingredients map grouping thumbnail files by ingredient categories.
  */
-export function loadIngredients(): {
-  [key: string]: {name: string; thumbnail: string; fileId: string}[];
-} {
+export function loadIngredients(): IngredientsData {
   const config = Config.readConfig();
   const sheetName = config['Ingredients sheet'];
   if (!SpreadsheetApp?.getActiveSpreadsheet()?.getSheetByName(sheetName)) {
@@ -39,9 +47,7 @@ export function loadIngredients(): {
     return {};
   }
 
-  const ingredientsAsObject: {
-    [key: string]: {name: string; thumbnail: string; fileId: string}[];
-  } = {};
+  const ingredientsAsObject: IngredientsData = {};
   parts.shift(); // Remove header row
 
   parts.forEach(part => {

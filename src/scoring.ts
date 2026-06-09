@@ -45,7 +45,7 @@ export function getScoringHeaders(): string[] | undefined {
  */
 export function addToScoringSheet(
   image: string,
-  geminiResponseParsed: {[key: string]: string}
+  geminiResponseParsed: {[headerName: string]: string}
 ): void {
   console.log('addToScoringSheet', {
     image,
