@@ -125,9 +125,6 @@ export function getImageAssets(folderId: string): void {
  */
 export function processImageAssets(
   backgroundDefinitions: BackgroundDefinition[],
-  projectId: string,
-  region = '',
-  modelId: string,
   scoringThreshold?: number,
   maxRegenerations?: number,
   imageAspectRatio?: string

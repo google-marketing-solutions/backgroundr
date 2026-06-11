@@ -221,9 +221,6 @@ describe('index.ts Entry Points', () => {
 
       expect(imageService.processImageAssets).toHaveBeenCalledWith(
         expect.any(Array),
-        'mock-cloud-project-id',
-        'mock-gcp-location',
-        'mock-image-generation-model',
         undefined,
         undefined,
         undefined

@@ -192,17 +192,12 @@ describe('image-service.ts', () => {
       const gemini = require('../gemini');
       gemini.queryGemini.mockReturnValue('generated-base64');
 
-      processImageAssets(
-        [
-          {
-            title: 'Variation 1',
-            description: [{type: 'text', value: 'scenic prompt'}],
-          },
-        ],
-        'project-id',
-        'location-id',
-        'model-id'
-      );
+      processImageAssets([
+        {
+          title: 'Variation 1',
+          description: [{type: 'text', value: 'scenic prompt'}],
+        },
+      ]);
 
       expect(gemini.queryGemini).toHaveBeenCalled();
       expect(mockSheetImages.setValue).toHaveBeenCalled();
@@ -226,9 +221,6 @@ describe('image-service.ts', () => {
 
       processImageAssets(
         [{title: 'Var1', description: [{type: 'text', value: 'scenic'}]}],
-        'project-id',
-        'location-id',
-        'model-id',
         5, // threshold
         2 // maxRegenerations
       );

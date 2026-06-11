@@ -184,9 +184,6 @@ export function generateImages(
 
   processImageAssets(
     manyPrompts,
-    config['Cloud Project Id'],
-    config['GCP Location'],
-    config['Image Generation Model'],
     scoringThreshold,
     maxRegenerations,
     imageAspectRatio
