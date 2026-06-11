@@ -45,7 +45,7 @@ Built as an elegant, web-native Google Sheets Add-on, BackgroundR lets you proce
 BackgroundR uses a modern, lightweight stack to deliver advanced GenAI features inside Google Workspace:
 
 - **Frontend (Sidebar UI)**: Built with **Angular 19** as a single-page application, optimized for seamless interactions.
-- **Backend Engine**: Powered by **TypeScript** transpiled to **Google Apps Script**, managed with [`aside`](https://github.com/google/aside).
+- **Backend Engine**: Powered by **TypeScript** transpiled to **Google Apps Script**, managed with [Clasp](https://github.com/google/clasp).
 - **Generative AI APIs**: Integrated directly with GCP's **Gemini Enterprise Agent Platform (formerly Vertex AI)** (Nano Banana).
 
 ---
@@ -155,7 +155,7 @@ npm run serve-ui
 This spins up the Angular development server at `http://localhost:4200`.
 
 ### Deployment
-To build the TypeScript codebase, compile and inject the Angular app into Google Apps Script format, and push via Google Clasp:
+To build the TypeScript codebase, compile and inject the Angular app into Google Apps Script format, and push via [Clasp](https://github.com/google/clasp):
 
 1. **Login to clasp**:
    ```bash
