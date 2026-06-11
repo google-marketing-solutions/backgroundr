@@ -10,11 +10,11 @@
     "lint": "eslint --fix --no-error-on-unmatched-pattern src/ test/",
     "bundle": "rollup --no-treeshake -c rollup.config.mjs",
     "build": "npm run clean && npm run bundle && ncp appsscript.json dist/appsscript.json",
-    "build-ui": "npm ci --legacy-peer-deps --prefix src/ui && npm run build --prefix src/ui",
+    "build-ui": "npm install --prefix src/ui && npm run build --prefix src/ui",
     "license": "license-check-and-add add -f license-config.json",
     "test": "jest test/ --passWithNoTests --detectOpenHandles",
     "test-ui": "npm run test --prefix src/ui",
-    "deploy": "npm ci --legacy-peer-deps && npm run lint && npm run test && npm run build && ncp appsscript.json dist/appsscript.json && ncp .clasp-dev.json .clasp.json && npm run build-ui && npm run deploy-ui && clasp push -f",
+    "deploy": "npm install && npm run lint && npm run test && npm run build && ncp appsscript.json dist/appsscript.json && ncp .clasp-dev.json .clasp.json && npm run build-ui && npm run deploy-ui && clasp push -f",
     "deploy-ui": "node deploy-ui.mjs",
     "deploy:prod": "npm run lint && npm run test && npm run build && ncp .clasp-prod.json .clasp.json && npm run build-ui && npm run deploy-ui && clasp push",
     "serve-ui": "cd src/ui && ng serve"
@@ -23,7 +23,6 @@
     "node": ">=12"
   },
   "dependencies": {
-    "@angular/platform-browser": "^19.0.5",
     "@google/clasp": "^2.4.2",
     "@types/google-apps-script": "^1.0.69",
     "@types/jest": "^29.5.5",
@@ -43,8 +42,5 @@
     "rollup-plugin-typescript2": "^0.35.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
-  },
-  "devDependencies": {
-    "@angular-devkit/build-angular": "^18.2.1"
   }
 }

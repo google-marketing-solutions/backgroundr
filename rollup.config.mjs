@@ -36,15 +36,11 @@ export default {
     }),
     {
       name: 'strip-exports',
-      generateBundle(options, bundle) {
-        for (const fileName in bundle) {
-          const chunk = bundle[fileName];
-          if (chunk.type === 'chunk') {
-            chunk.code = chunk.code.replace(/export\s+\{[\s\S]*\};/g, '');
-          }
-        }
+      renderChunk(code) {
+        const cleanCode = code.replace(/export\s+\{[\s\S]*\};/g, '');
+        return { code: cleanCode, map: null };
       }
-    },
+    }
   ],
   context: 'this',
 };
