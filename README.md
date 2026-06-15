@@ -30,11 +30,11 @@ Built as an elegant, web-native Google Sheets Add-on, BackgroundR lets you proce
 
 --------------------------------------------------------------------------------
 
-[Key Features](#key-features) •
-[Architecture & Tech Stack](#architecture--tech-stack) • [Getting Started](#getting-started) •
-[Configuration Options](#configuration-options) •
-[Scoring](#scoring--automated-regeneration) •
-[Developer Guide](#developer-guide)
+[Key Features](#-key-features) •
+[Architecture & Tech Stack](#-architecture--tech-stack) • [Getting Started](#-getting-started) •
+[Configuration Options](#-configuration-options) •
+[Scoring](#-scoring--automated-regeneration) •
+[Developer Guide](#-developer-guide)
 
 --------------------------------------------------------------------------------
 
