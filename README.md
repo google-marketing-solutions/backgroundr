@@ -28,7 +28,15 @@ limitations under the License.
 
 Built as an elegant, web-native Google Sheets Add-on, BackgroundR lets you process images in bulk directly from Google Sheets, powered by Gemini Enterprise Agent Platform (formerly Vertex AI).
 
----
+--------------------------------------------------------------------------------
+
+[Key Features](#-key-features) •
+[Architecture & Tech Stack](#-architecture--tech-stack) • [Getting Started](#-getting-started) •
+[Configuration Options](#-configuration-options) •
+[Scoring](#-scoring--automated-regeneration) •
+[Developer Guide](#-developer-guide)
+
+--------------------------------------------------------------------------------
 
 ## ✨ Key Features
 
@@ -55,12 +63,12 @@ BackgroundR uses a modern, lightweight stack to deliver advanced GenAI features 
 We aim to keep BackgroundR simple yet scalable. Follow these steps to set up and start generating assets:
 
 ### 1. Clone the Google Sheet Template
-Make a copy of this [Google Sheet Template](https://docs.google.com/spreadsheets/d/1FPlQbvqovVNlUFsCLJ9c_aEZ9bMDiZxVi4VsDn7daWM/copy).
+Make a copy of this [Google Sheet Template](https://docs.google.com/spreadsheets/d/1e4oivqNoTFDTBKlpXi__8H5U0s2BwQg4hRR9z2UgARU/copy).
 
 ### 2. Set Up Your Drive Directories
 1. Create a folder in Google Drive to store your raw "base" product images.
 2. Copy your folder's ID from its URL.
-   > **Example**: For URL `https://drive.google.com/drive/folders/1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF`, the folder ID is `1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF`.
+   > **Example**: For URL `https://drive.google.com/drive/folders/1zUg7xdx3d28M3KlbGKOcU-G05SdiqEN3`, the folder ID is `1zUg7xdx3d28M3KlbGKOcU-G05SdiqEN3`.
 
 ### 3. Open the Configurator
 In the Google Sheet menu bar, go to **BackgroundR on 🍌s** > **🎨 Open configurator**.
@@ -68,9 +76,9 @@ In the Google Sheet menu bar, go to **BackgroundR on 🍌s** > **🎨 Open confi
 > You might need to authorize the script to run in your account on the first launch.
 
 ### 4. Configure your GCP Project & Drive Folder
-Under the **Config** sheet or inside the configurator sidebar, set:
+Under the **Config** sheet set:
 - **Cloud Project ID**: Your GCP Project where the Gemini Enterprise Agent Platform (formerly Vertex AI) API is enabled.
-- **GCP Location**: Region of your choice (e.g. `us-central1` or `europe-west3`).
+- **GCP Location**: Region of your choice (e.g. `global` or `us-central1`).
 - **Drive Folder ID**: Paste the Google Drive folder ID copied in Step 2.
 
 > [!IMPORTANT]
@@ -97,7 +105,7 @@ The `Config` sheet governs BackgroundR behavior. Here is a description of the co
 | **Cloud Project Id** | Google Cloud Project ID with Gemini Enterprise Agent Platform (formerly Vertex AI) enabled | `my-brand-gcp-project` |
 | **Image Generation Model** | Model ID used for image generation | `gemini-2.5-flash-image` |
 | **Scoring Model** | Model ID used for scoring generated images | `gemini-2.5-flash` |
-| **Drive Folder Id** | Google Drive Folder ID containing your source images | `1jt88MGoqMTGhuGYujiOpY8wUD_3aZsJF` |
+| **Drive Folder Id** | Google Drive Folder ID containing your source images | `1zUg7xdx3d28M3KlbGKOcU-G05SdiqEN3` |
 | **GCP Location** | Cloud region for Gemini Enterprise Agent Platform (formerly Vertex AI) API calls | `us-central1` or `europe-west3` |
 | **Dropdowns sheet** | The sheet defining your variant prompt definitions | `Dropdowns` |
 | **Ingredients sheet** | The sheet defining ingredient image assets | `Ingredients` |

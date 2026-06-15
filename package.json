@@ -1,6 +1,6 @@
 {
-  "name": "background-r",
-  "version": "0.0.0",
+  "name": "BackgroundR",
+  "version": "2.0",
   "description": "",
   "main": "build/index.js",
   "license": "Apache-2.0",
