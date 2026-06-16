@@ -85,14 +85,19 @@ Under the **Config** sheet set:
 > Ensure the [Gemini Enterprise Agent Platform (formerly Vertex AI) API](https://cloud.google.com/vertex-ai/docs/generative-ai/start/quickstarts/api-quickstart) is enabled on your GCP Project.
 
 ### 5. Run and Generate
-1. Select **BackgroundR on 🍌s** > **📥 Load images from Google Drive** to populate Column A with your source images.
+1. Select **BackgroundR on 🍌s** > **📥 Load images from Google Drive** to pull your images (files up to 30MB only, which is a Nano Banana limitation) into Column A of the `Images` sheet.
 2. Set your variants in the `Dropdowns` and `Ingredients` sheets.
-3. Click **Apply Selections** or **Universal Generate** in the sidebar and watch the AI generate your brand-aligned images!
-
-> [!NOTE]
-> BackgroundR only creates new images for empty cells. To replace existing images, clear columns **E**, **F**, and **G** first.
->
-> Nano Banana enforces an image size limit of ~30MB; larger files will be skipped.
+3. Configure your output preferences in the sidebar:
+   - **Aspect Ratio**: Select the desired dimensions for the generated images (e.g. 1:1, 16:9).
+     > [!NOTE]
+     > Do not change the dropdown in case you want to preserve the original aspect ratio of your images.
+   - **Number of Images**: Specify how many variations to generate per asset.
+     > [!NOTE]
+     > BackgroundR only generates images into *empty* cells. If you request 2 images but there are already 2 images in the row, no generation will happen. To fix this and force regeneration, clear the existing images first manually (by selecting the corresponding cells and pressing the Delete key) or using the **BackgroundR on 🍌s** > **🧹 Clear generated images** menu option.
+   - **Automated Scoring (Optional)**: Check this to ensure asset quality. When enabled, specify a **Threshold** (the minimum acceptable score from the Gemini evaluator) and **Max Regenerations** (how many times to retry generating an image if it falls below the threshold).
+4. Choose your generation method using the buttons at the bottom of the sidebar:
+   - **Apply Selections:** Generates variations based *only* on the specific items you have selected in the sidebar dropdowns.
+   - **Universal Generate:** Acts as a bulk "I'm feeling lucky" mode. Instead of using your sidebar variant selections, it automatically reads *every* prompt combination directly from the `Dropdowns` sheet and applies them to *all* images currently loaded in the `Images` sheet. *(Note: Any Ingredients you actively select in the sidebar will still be applied)*.
 
 ---
 

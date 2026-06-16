@@ -92,7 +92,7 @@ export function getImagesToProcess(): ImageQueue[] {
 }
 
 /**
- * Fetches up to 10 image files under 30MB from the specified Drive folder
+ * Fetches image files under 30MB from the specified Drive folder
  * and loads them into the 'Images' sheet for processing.
  *
  * @param folderId Google Drive folder containing source image assets.
