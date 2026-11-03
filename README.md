@@ -108,8 +108,8 @@ The `Config` sheet governs BackgroundR behavior. Here is a description of the co
 | Configuration Option | Description | Example / Default Value |
 | :--- | :--- | :--- |
 | **Cloud Project Id** | Google Cloud Project ID with Gemini Enterprise Agent Platform (formerly Vertex AI) enabled | `my-brand-gcp-project` |
-| **Image Generation Model** | Model ID used for image generation | `gemini-2.5-flash-image` |
-| **Scoring Model** | Model ID used for scoring generated images | `gemini-2.5-flash` |
+| **Image Generation Model** | Model ID used for image generation | `gemini-3.1-flash-image` |
+| **Scoring Model** | Model ID used for scoring generated images | `gemini-3.8-flash` |
 | **Drive Folder Id** | Google Drive Folder ID containing your source images | `1zUg7xdx3d28M3KlbGKOcU-G05SdiqEN3` |
 | **GCP Location** | Cloud region for Gemini Enterprise Agent Platform (formerly Vertex AI) API calls | `us-central1` or `europe-west3` |
 | **Dropdowns sheet** | The sheet defining your variant prompt definitions | `Dropdowns` |

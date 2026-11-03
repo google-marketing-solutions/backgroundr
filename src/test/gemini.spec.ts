@@ -167,6 +167,36 @@ describe('VertexAiApi', () => {
           ),
         })
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sentPayload = JSON.parse(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (global as any).UrlFetchApp.fetch.mock.calls[0][1].payload
+      );
+      expect(sentPayload.generationConfig.thinkingConfig).toBeUndefined();
+    });
+
+    it('should include thinkingConfig and BLOCK_NONE safety thresholds for text scoring model', () => {
+      mockUrlFetchApp(200, JSON.stringify({candidates: []}));
+
+      api.callGeminiApi([{type: 'text', value: 'score this'}], true);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sentPayload = JSON.parse(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (global as any).UrlFetchApp.fetch.mock.calls[0][1].payload
+      );
+      expect(sentPayload.generationConfig.thinkingConfig).toEqual({
+        thinkingLevel: 'medium',
+      });
+      expect(sentPayload.generationConfig.temperature).toBeUndefined();
+      expect(sentPayload.generationConfig.topK).toBeUndefined();
+      expect(sentPayload.generationConfig.topP).toBeUndefined();
+      expect(sentPayload.safetySettings).toEqual([
+        {category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE'},
+        {category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE'},
+        {category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE'},
+        {category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE'},
+      ]);
     });
 
     it('should include responseSchema when schema is set', () => {

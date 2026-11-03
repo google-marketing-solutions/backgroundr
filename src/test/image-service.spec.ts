@@ -105,11 +105,17 @@ describe('image-service.ts', () => {
       }),
     };
 
+    mockBlob = {
+      getContentType: jest.fn().mockReturnValue('image/png'),
+      getBytes: jest.fn().mockReturnValue([1, 2, 3]),
+      getAs: jest.fn().mockReturnThis(),
+    };
+
     (global as any).Utilities = {
       base64Encode: jest.fn().mockReturnValue('mock-base64'),
       base64Decode: jest.fn().mockReturnValue('mock-bytes'),
       formatDate: jest.fn().mockReturnValue('mock-date'),
-      newBlob: jest.fn().mockReturnValue('mock-blob'),
+      newBlob: jest.fn().mockReturnValue(mockBlob),
     };
 
     (global as any).Session = {
@@ -120,11 +126,6 @@ describe('image-service.ts', () => {
       fetch: jest.fn().mockReturnValue({
         getBlob: jest.fn().mockReturnValue(mockBlob),
       }),
-    };
-
-    mockBlob = {
-      getContentType: jest.fn().mockReturnValue('image/png'),
-      getBytes: jest.fn().mockReturnValue([1, 2, 3]),
     };
   });
 
@@ -200,7 +201,38 @@ describe('image-service.ts', () => {
       ]);
 
       expect(gemini.queryGemini).toHaveBeenCalled();
+      expect(
+        (global as any).SpreadsheetApp.newCellImage().setSourceUrl
+      ).toHaveBeenCalledWith('data:image/jpeg;base64,mock-base64');
       expect(mockSheetImages.setValue).toHaveBeenCalled();
+    });
+
+    it('should truncate long error messages to 1000 characters', () => {
+      mockSheetImages.getValues.mockReturnValue([['id'], ['img-id-1']]);
+      mockSheetImages.getValue.mockReturnValue('');
+
+      const driveApi = require('../drive-api');
+      driveApi.getFileById.mockReturnValue({
+        getBlob: () => mockBlob,
+        getMimeType: () => 'image/png',
+      });
+
+      const gemini = require('../gemini');
+      const longMessage = 'x'.repeat(1500);
+      gemini.queryGemini.mockImplementation(() => {
+        throw new Error(longMessage);
+      });
+
+      processImageAssets([
+        {
+          title: 'Variation 1',
+          description: [{type: 'text', value: 'scenic prompt'}],
+        },
+      ]);
+
+      expect(mockSheetImages.setValue).toHaveBeenCalledWith(
+        `Error: ${'x'.repeat(1000)}`
+      );
     });
 
     it('should regenerate image if score is below threshold', () => {
