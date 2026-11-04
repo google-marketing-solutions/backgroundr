@@ -67,7 +67,7 @@ interface GeminiRequestPayload {
     maxOutputTokens: number;
     responseModalities: string[];
     thinkingConfig?: {
-      thinkingLevel: string;
+      thinkingLevel: 'low' | 'medium' | 'high' | 'LOW' | 'MEDIUM' | 'HIGH';
     };
     imageConfig?: {
       aspectRatio: string;
@@ -261,8 +261,8 @@ export class VertexAiApi {
           ? ['TEXT', 'IMAGE']
           : ['TEXT'],
       },
-// For Gemini 3.8 Flash, we use 'BLOCK_NONE' to guarantee responses are never blocked 
-// while keeping safety telemetry active to comply with Vertex AI enterprise policies.
+      // For Gemini 3.8 Flash, we use 'BLOCK_NONE' to guarantee responses are never blocked
+      // while keeping safety telemetry active to comply with Vertex AI enterprise policies.
 
       safetySettings: [
         {
