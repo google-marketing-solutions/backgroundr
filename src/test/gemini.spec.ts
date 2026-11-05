@@ -168,8 +168,8 @@ describe('VertexAiApi', () => {
         })
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // Verify that thinkingConfig is not included for standard image generation models
       const sentPayload = JSON.parse(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (global as any).UrlFetchApp.fetch.mock.calls[0][1].payload
       );
       expect(sentPayload.generationConfig.thinkingConfig).toBeUndefined();
@@ -182,7 +182,6 @@ describe('VertexAiApi', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sentPayload = JSON.parse(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (global as any).UrlFetchApp.fetch.mock.calls[0][1].payload
       );
       expect(sentPayload.generationConfig.thinkingConfig).toEqual({
