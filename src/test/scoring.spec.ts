@@ -63,6 +63,18 @@ describe('scoring.ts', () => {
         build: jest.fn().mockReturnValue('mock-cell-image'),
       }),
     };
+
+    const mockJpegBlob = {
+      getBytes: jest.fn().mockReturnValue([4, 5, 6]),
+    };
+    const mockPngBlob = {
+      getAs: jest.fn().mockReturnValue(mockJpegBlob),
+    };
+    (global as any).Utilities = {
+      base64Decode: jest.fn().mockReturnValue([1, 2, 3]),
+      newBlob: jest.fn().mockReturnValue(mockPngBlob),
+      base64Encode: jest.fn().mockReturnValue('compressed-base64'),
+    };
   });
 
   describe('getScoringHeaders', () => {
@@ -97,6 +109,9 @@ describe('scoring.ts', () => {
         'yes',
         'no',
       ]);
+      expect(
+        (global as any).SpreadsheetApp.newCellImage().setSourceUrl
+      ).toHaveBeenCalledWith('data:image/jpeg;base64,compressed-base64');
       expect(mockSheetScoring.getRange).toHaveBeenCalledWith(11, 1, 1, 1);
       expect(mockSheetScoring.setValue).toHaveBeenCalledWith('mock-cell-image');
     });

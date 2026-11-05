@@ -153,7 +153,7 @@ export function processImageAssets(
             return null;
           }
 
-          let resultImageBase64;
+          let resultImageBase64 = '';
           if (scoringThreshold && maxRegenerations) {
             for (
               let attemptNumber = 0;
@@ -204,8 +204,25 @@ export function processImageAssets(
               config['GCP Location']
             );
           }
+          // --- COMPRESSION LOGIC TO PREVENT SHEET CRASH ---
+             const safeImageBase64 = (resultImageBase64 !== null && resultImageBase64 !== undefined) ? resultImageBase64 : '';
+             let compressedBase64 = safeImageBase64;
+
+             if (safeImageBase64) {
+               try {
+                 const blob = Utilities.newBlob(
+                   Utilities.base64Decode(safeImageBase64),
+                   'image/png'
+                );
+                const jpegBlob = blob.getAs('image/jpeg');
+                compressedBase64 = Utilities.base64Encode(jpegBlob.getBytes());
+              } catch (err) {
+                console.error('Image compression failed', err);
+             }
+           }
+           
           return SpreadsheetApp.newCellImage()
-            .setSourceUrl(`data:image/png;base64,${resultImageBase64}`)
+            .setSourceUrl(`data:image/jpeg;base64,${compressedBase64}`)
             .build();
         });
         variations.forEach((img, i) => {
@@ -221,10 +238,12 @@ export function processImageAssets(
           imageSheet.setColumnWidth(i, 256);
         }
       } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        // Extract error message safely and truncate it to avoid exceeding Google Sheets cell limits
         imageSheet
           .getRange(currentIndex + 1, 1, 1, 1)
           .offset(HEADER_ROWS, 4)
-          .setValue(`Error: ${e}`);
+          .setValue(`Error: ${errorMessage.substring(0, 1000)}`);
       }
     });
 }

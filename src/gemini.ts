@@ -62,12 +62,13 @@ interface GeminiApiResponse {
  */
 interface GeminiRequestPayload {
   contents: Array<{role: string; parts: GeminiRequest[]}>;
+  // Thinking parameter change as per new version of gemini
   generationConfig: {
-    temperature: number;
     maxOutputTokens: number;
     responseModalities: string[];
-    topK: number;
-    topP: number;
+    thinkingConfig?: {
+      thinkingLevel: 'low' | 'medium' | 'high' | 'LOW' | 'MEDIUM' | 'HIGH';
+    };
     imageConfig?: {
       aspectRatio: string;
       imageSize: string;
@@ -255,33 +256,40 @@ export class VertexAiApi {
         },
       ],
       generationConfig: {
-        temperature: 1,
         maxOutputTokens: 32768,
         responseModalities: this.geminiModel.includes('image')
           ? ['TEXT', 'IMAGE']
           : ['TEXT'],
-        topK: 40,
-        topP: 0.95,
       },
+      // For Gemini 3.8 Flash, we use 'BLOCK_NONE' to guarantee responses are never blocked
+      // while keeping safety telemetry active to comply with Vertex AI enterprise policies.
+
       safetySettings: [
         {
           category: 'HARM_CATEGORY_HATE_SPEECH',
-          threshold: 'OFF',
+          threshold: 'BLOCK_NONE',
         },
         {
           category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'OFF',
+          threshold: 'BLOCK_NONE',
         },
         {
           category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'OFF',
+          threshold: 'BLOCK_NONE',
         },
         {
           category: 'HARM_CATEGORY_HARASSMENT',
-          threshold: 'OFF',
+          threshold: 'BLOCK_NONE',
         },
       ],
     };
+
+    // Apply thinkingConfig ONLY for the text scoring model (gemini-3.8-flash)
+    if (!this.geminiModel.includes('image')) {
+      payload.generationConfig.thinkingConfig = {
+        thinkingLevel: 'medium',
+      };
+    }
 
     if (this.geminiModel.includes('image') && this.imageAspectRatio) {
       payload.generationConfig.imageConfig = {

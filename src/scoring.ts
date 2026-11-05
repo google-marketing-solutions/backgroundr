@@ -52,8 +52,17 @@ export function addToScoringSheet(
     geminiResponseParsed,
   });
   const config = Config.readConfig();
+  // --- COMPRESSION LOGIC TO PREVENT SHEET CRASH ---
+  let compressedBase64 = image;
+  try {
+    const blob = Utilities.newBlob(Utilities.base64Decode(image), 'image/png');
+    const jpegBlob = blob.getAs('image/jpeg');
+    compressedBase64 = Utilities.base64Encode(jpegBlob.getBytes());
+  } catch (err) {
+    console.error('Image compression failed', err);
+  }
   const img = SpreadsheetApp.newCellImage()
-    .setSourceUrl(`data:image/png;base64,${image}`)
+    .setSourceUrl(`data:image/jpeg;base64,${compressedBase64}`)
     .build();
 
   const sheet = SpreadsheetApp.getActive().getSheetByName(
